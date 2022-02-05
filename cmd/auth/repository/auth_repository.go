@@ -7,6 +7,7 @@ import (
 	"strings"
 )
 
+//go:generate mockgen -source=auth_repository.go -destination auth_repository_mock.go -package repository
 const (
 	ADMIN            = "ADMIN"
 	USER             = "USER"
@@ -46,7 +47,10 @@ func (authRepo *AuthRepository) Login(payload models.LoginPayload) (*string, err
 
 	user := models.User{}
 
-	if result := authRepo.database.Where("email = ?", strings.ToLower(payload.Email)).First(&user); result.Error != nil {
+	if result := authRepo.database.Where("email = ?", strings.ToLower(payload.Email)).First(&user); result.Error != nil || result.RowsAffected < 1 {
+		if result.RowsAffected < 1 {
+			return nil, errors.New(EMAIL_NOT_FOUND)
+		}
 		return nil, result.Error
 	}
 

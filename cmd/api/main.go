@@ -1,15 +1,23 @@
 package main
 
 import (
+	"SuperListsAPI/cmd/auth/handler"
+	"SuperListsAPI/cmd/auth/repository"
+	"SuperListsAPI/cmd/auth/service"
 	"SuperListsAPI/internal/database"
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
+
 	database.InitDatabase()
 
 	router := gin.Default()
 	gin.ForceConsoleColor()
+
+	authRepository := repository.NewAuthRepository(database.AppDatabase)
+	authService := service.NewAuthService(&authRepository)
+	authHandler := handler.NewAuthHandler(&authService)
 
 	router.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{
@@ -21,12 +29,8 @@ func main() {
 	{
 		auth := v1.Group("/auth")
 		{
-			auth.GET("/login", func(c *gin.Context) {
-				c.JSON(200, gin.H{
-					"message": "logged",
-				})
-			})
-			auth.POST("/signup", nil)
+			auth.GET("/login", authHandler.Login)
+			auth.POST("/signup", authHandler.SignUp)
 		}
 
 	}

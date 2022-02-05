@@ -5,6 +5,7 @@ go 1.17
 require (
 	github.com/gin-gonic/gin v1.7.7
 	github.com/golang-jwt/jwt v3.2.2+incompatible
+	github.com/golang/mock v1.6.0
 	github.com/stretchr/testify v1.7.0
 	golang.org/x/crypto v0.0.0-20220131195533-30dcbda58838
 	gorm.io/driver/postgres v1.2.3

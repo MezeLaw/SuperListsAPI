@@ -4,6 +4,8 @@ import (
 	"SuperListsAPI/cmd/auth/models"
 )
 
+//go:generate mockgen -source=auth_service.go -destination auth_service_mock.go -package service
+
 type IAuthRepository interface {
 	Login(payload models.LoginPayload) (*string, error)
 	SignUp(user *models.User) (*models.User, error)

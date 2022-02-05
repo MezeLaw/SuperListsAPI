@@ -8,6 +8,8 @@ import (
 	"net/http"
 )
 
+//go:generate mockgen -source=auth.go -destination auth_mock.go -package handler
+
 type IAuthService interface {
 	Login(payload models.LoginPayload) (*string, error)
 	SignUp(userRequest *models.User) (*models.User, error)
@@ -39,6 +41,9 @@ func (authHandler *AuthHandler) Login(c *gin.Context) {
 		switch err.Error() {
 		case repository.INVALID_PASSWORD:
 			c.JSON(http.StatusUnauthorized, err.Error())
+			return
+		case repository.EMAIL_NOT_FOUND:
+			c.JSON(http.StatusNotFound, err.Error())
 			return
 		default:
 			c.JSON(http.StatusInternalServerError, err.Error())
