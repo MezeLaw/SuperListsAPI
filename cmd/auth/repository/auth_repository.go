@@ -12,6 +12,8 @@ const (
 	ADMIN            = "ADMIN"
 	USER             = "USER"
 	SECRET_KEY       = "rumpelstiltskin"
+	ISSUER           = "MezeTheKing"
+	EXPIRATION_HOURS = 7
 	INVALID_PASSWORD = "invalid credentials"
 	EMAIL_NOT_FOUND  = "email not found"
 )
@@ -60,8 +62,8 @@ func (authRepo *AuthRepository) Login(payload models.LoginPayload) (*string, err
 
 	jwtWrapper := models.JwtWrapper{
 		SecretKey:       SECRET_KEY,
-		Issuer:          "",
-		ExpirationHours: 7,
+		Issuer:          ISSUER,
+		ExpirationHours: EXPIRATION_HOURS,
 	}
 
 	token, err := jwtWrapper.GenerateToken(user.Email, user.Role)
