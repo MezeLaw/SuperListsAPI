@@ -25,7 +25,7 @@ func NewAuthRepository(db *gorm.DB) AuthRepository {
 }
 
 func (authRepo *AuthRepository) SignUp(user *models.User) (*models.User, error) {
-
+	//TODO probar de alguna forma el err del hash
 	if err := user.HashPassword(user.Password); err != nil {
 		return nil, err
 	}
@@ -48,7 +48,7 @@ func (authRepo *AuthRepository) Login(payload models.LoginPayload) (*string, err
 	user := models.User{}
 
 	if result := authRepo.database.Where("email = ?", strings.ToLower(payload.Email)).First(&user); result.Error != nil || result.RowsAffected < 1 {
-		if result.RowsAffected < 1 {
+		if result.Error.Error() == "record not found" {
 			return nil, errors.New(EMAIL_NOT_FOUND)
 		}
 		return nil, result.Error
