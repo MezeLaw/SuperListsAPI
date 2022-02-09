@@ -55,7 +55,7 @@ func TestAuthHandler_Login_Ok(t *testing.T) {
 
 	validLoginPayload := GetValidLoginPayload()
 
-	jsonDto, _ := json.Marshal(validLoginPayload)
+	jsonDto, _ := json.Marshal(&validLoginPayload)
 
 	req, _ := http.NewRequest(http.MethodGet, "/v1/auth/login", strings.NewReader(string(jsonDto)))
 
@@ -82,6 +82,36 @@ func TestAuthHandler_Login_Bad_Request(t *testing.T) {
 	resp := httptest.NewRecorder()
 
 	validLoginPayload := 1
+
+	jsonDto, _ := json.Marshal(validLoginPayload)
+
+	req, _ := http.NewRequest(http.MethodGet, "/v1/auth/login", strings.NewReader(string(jsonDto)))
+
+	gin.SetMode(gin.TestMode)
+
+	router := gin.Default()
+
+	v1 := router.Group("/v1/auth/")
+	{
+		v1.GET("/login", authHandler.Login)
+	}
+
+	router.ServeHTTP(resp, req)
+
+	assert.Equal(t, resp.Code, http.StatusBadRequest)
+
+}
+
+func TestAuthHandler_Login_Invalid_Required_JsonValues(t *testing.T) {
+
+	authService := NewMockIAuthService(gomock.NewController(t))
+	authHandler := NewAuthHandler(authService)
+
+	resp := httptest.NewRecorder()
+
+	validLoginPayload := map[string]interface{}{
+		"email": "emailvalid@gmail.com",
+	}
 
 	jsonDto, _ := json.Marshal(validLoginPayload)
 
@@ -248,6 +278,35 @@ func TestAuthHandler_SignUp_Internal_Server_Error(t *testing.T) {
 func TestAuthHandler_SignUp_Invalid_Json(t *testing.T) {
 
 	invalidUser := 1
+
+	authService := NewMockIAuthService(gomock.NewController(t))
+
+	authHandler := NewAuthHandler(authService)
+
+	gin.SetMode(gin.TestMode)
+	router := gin.Default()
+
+	v1 := router.Group("/v1/auth/")
+	{
+		v1.POST("/signup", authHandler.SignUp)
+	}
+
+	jsonDto, _ := json.Marshal(invalidUser)
+
+	resp := httptest.NewRecorder()
+	req, _ := http.NewRequest(http.MethodPost, "/v1/auth/signup", strings.NewReader(string(jsonDto)))
+
+	router.ServeHTTP(resp, req)
+
+	assert.Equal(t, resp.Code, http.StatusBadRequest)
+
+}
+
+func TestAuthHandler_SignUp_Invalid_Json_On_Required_Attr(t *testing.T) {
+
+	invalidUser := map[string]interface{}{
+		"email": "emailvalido@gmail.com",
+	}
 
 	authService := NewMockIAuthService(gomock.NewController(t))
 

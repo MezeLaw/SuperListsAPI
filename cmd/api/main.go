@@ -33,6 +33,14 @@ func main() {
 			auth.POST("/signup", authHandler.SignUp)
 		}
 
+		lists := v1.Group("/lists")
+		{
+			lists.POST("/", nil)
+			lists.GET("/:id", nil)
+			lists.PUT("/:id", nil)
+			lists.DELETE("/:id", nil)
+		}
+
 	}
 
 	router.Run()

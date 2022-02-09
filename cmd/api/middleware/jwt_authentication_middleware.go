@@ -34,5 +34,6 @@ func ValidateJWTOnRequest(c *gin.Context) {
 
 	c.Request.Header.Add("ROLE", claims.Role)
 	c.Request.Header.Add("EMAIL", claims.Email)
+	c.Request.Header.Add("USER_ID", claims.Id)
 	return
 }

@@ -4,6 +4,7 @@ import (
 	"SuperListsAPI/cmd/auth/models"
 	"SuperListsAPI/cmd/auth/repository"
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 	"log"
 	"net/http"
 )
@@ -23,10 +24,23 @@ func NewAuthHandler(authService IAuthService) AuthHandler {
 	return AuthHandler{authService: authService}
 }
 
+//var validate *validator.Validate
+
 func (authHandler *AuthHandler) Login(c *gin.Context) {
 	var payload models.LoginPayload
 
+	validate := validator.New()
 	err := c.ShouldBindJSON(&payload)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"msg": "invalid json",
+		})
+		c.Abort()
+		return
+	}
+
+	err = validate.Struct(payload)
+
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"msg": "invalid json",
@@ -57,7 +71,7 @@ func (authHandler *AuthHandler) Login(c *gin.Context) {
 
 func (authHandler *AuthHandler) SignUp(c *gin.Context) {
 	var user models.User
-
+	validate := validator.New()
 	err := c.ShouldBindJSON(&user)
 	if err != nil {
 		log.Println(err)
@@ -67,6 +81,16 @@ func (authHandler *AuthHandler) SignUp(c *gin.Context) {
 		})
 		c.Abort()
 
+		return
+	}
+
+	err = validate.Struct(user)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"msg": "invalid json",
+		})
+		c.Abort()
 		return
 	}
 
