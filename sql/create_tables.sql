@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS lists (
                               "name" varchar(150) NULL,
                               description varchar(150) NULL,
                               invite_code text NULL,
-                              user_creator bigint NOT NULL,
+                              user_creator_id bigint NOT NULL,
                               created_at timestamp without time zone null DEFAULT CURRENT_TIMESTAMP,
                               updated_at timestamp without time zone null DEFAULT NULL,
                               deleted_at timestamp without time zone null DEFAULT NULL
