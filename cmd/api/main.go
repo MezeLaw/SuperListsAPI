@@ -4,6 +4,9 @@ import (
 	"SuperListsAPI/cmd/auth/handler"
 	"SuperListsAPI/cmd/auth/repository"
 	"SuperListsAPI/cmd/auth/service"
+	listHandler "SuperListsAPI/cmd/lists/handler"
+	listRepository "SuperListsAPI/cmd/lists/repository"
+	listService "SuperListsAPI/cmd/lists/service"
 	userListHandler "SuperListsAPI/cmd/userLists/handler"
 	userListRepository "SuperListsAPI/cmd/userLists/repository"
 	userListService "SuperListsAPI/cmd/userLists/service"
@@ -26,6 +29,10 @@ func main() {
 	userListService := userListService.NewUserListService(&userListRepository)
 	userListHandler := userListHandler.NewUserListHandler(&userListService)
 
+	listRepository := listRepository.NewListRepository(database.AppDatabase)
+	listService := listService.NewListService(&listRepository)
+	listsHandler := listHandler.NewListHandler(&listService)
+
 	router.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "pong",
@@ -42,10 +49,10 @@ func main() {
 
 		lists := v1.Group("/lists")
 		{
-			lists.POST("/", nil)
-			lists.GET("/:id", nil)
-			lists.PUT("/:id", nil)
-			lists.DELETE("/:id", nil)
+			lists.POST("/", listsHandler.Create)
+			lists.GET("/:id", listsHandler.Get)
+			lists.PUT("/:id", listsHandler.Update)
+			lists.DELETE("/:id", listsHandler.Delete)
 		}
 
 		userLists := v1.Group("/userLists")
