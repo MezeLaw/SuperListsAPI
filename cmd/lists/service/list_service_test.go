@@ -148,10 +148,10 @@ func TestListService_Update_Error(t *testing.T) {
 
 func TestListService_Delete(t *testing.T) {
 
-	deletedId := 1
+	deletedIds := []uint{uint(1)}
 
 	mockedRepo := NewMockIListRepository(gomock.NewController(t))
-	mockedRepo.EXPECT().Delete(gomock.Any()).Return(&deletedId, nil)
+	mockedRepo.EXPECT().Delete(gomock.Any()).Return(&deletedIds, nil)
 	listService := NewListService(mockedRepo)
 
 	result, err := listService.Delete([]uint{1})

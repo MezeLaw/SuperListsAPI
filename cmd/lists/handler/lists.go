@@ -246,11 +246,7 @@ func (lh *ListHandler) Delete(c *gin.Context) {
 	}
 	//TODO mejorar esto, pasar a la logica de servicio
 	//Si es el dueño, delete all the userLists sino a la unica que tiene
-	if list.UserCreatorID == uint(parsedUserID) {
-		idsToDelete = UserListsToDelete(*userListsByListID, parsedUserID, true)
-	} else {
-		idsToDelete = UserListsToDelete(*userListsByListID, parsedUserID, false)
-	}
+	idsToDelete = UserListsToDelete(*userListsByListID, parsedUserID, list.UserCreatorID == uint(parsedUserID))
 
 	deletedIDs, err := lh.listService.Delete(idsToDelete)
 

@@ -348,7 +348,7 @@ func TestListRepository_Delete(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.NotNil(t, result)
-	assert.Equal(t, *result, 1)
+	assert.Equal(t, *result, []uint{uint(1)})
 }
 
 func TestListRepository_Delete_Error(t *testing.T) {

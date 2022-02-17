@@ -694,17 +694,25 @@ func TestListHandler_Update_Returns_Not_Found_List_To_Update(t *testing.T) {
 
 func TestListHandler_Delete(t *testing.T) {
 	validList := GetValidList()
-
+	userLists := []userListsModel.UserList{userListsModel.UserList{
+		ListID: 1,
+		UserID: 1,
+	}}
 	inviteCode, _ := uuid.NewV4()
 	validList.InviteCode = inviteCode.String()
 	validList.UserCreatorID = 1
 	validList.ID = 1
 
-	deletedID := 1
+	deletedIDs := []uint{uint(1)}
 
 	listService := NewMockIListService(gomock.NewController(t))
-	listService.EXPECT().Delete(gomock.Any()).Return(&deletedID, nil)
+
+	listService.EXPECT().Delete(gomock.Any()).Return(&deletedIDs, nil)
+
 	userListService := NewMockIUserListService(gomock.NewController(t))
+
+	userListService.EXPECT().GetUserListsByListID(gomock.Any()).Return(&userLists, nil)
+	listService.EXPECT().Get(gomock.Any()).Return(&validList, nil)
 
 	listHandler := NewListHandler(listService, userListService)
 
@@ -720,23 +728,36 @@ func TestListHandler_Delete(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	req, _ := http.NewRequest(http.MethodDelete, "/v1/lists/1", nil)
-
+	req.Header.Add("USER_ID", "1")
 	c.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusOK, w.Code)
 }
 
-func TestListHandler_Delete_Returns_Service_Error(t *testing.T) {
+func TestListHandler_Delete_Not_Owner_List(t *testing.T) {
 	validList := GetValidList()
-
+	userLists := []userListsModel.UserList{userListsModel.UserList{
+		ListID: 1,
+		UserID: 1,
+	}, userListsModel.UserList{
+		ListID: 1,
+		UserID: 2,
+	}}
 	inviteCode, _ := uuid.NewV4()
 	validList.InviteCode = inviteCode.String()
-	validList.UserCreatorID = 1
+	validList.UserCreatorID = 2
 	validList.ID = 1
 
+	deletedIDs := []uint{uint(1)}
+
 	listService := NewMockIListService(gomock.NewController(t))
-	listService.EXPECT().Delete(gomock.Any()).Return(nil, errors.New("error from list service"))
+
+	listService.EXPECT().Delete(gomock.Any()).Return(&deletedIDs, nil)
+	listService.EXPECT().Get(gomock.Any()).Return(&validList, nil)
+
 	userListService := NewMockIUserListService(gomock.NewController(t))
+
+	userListService.EXPECT().GetUserListsByListID(gomock.Any()).Return(&userLists, nil)
 
 	listHandler := NewListHandler(listService, userListService)
 
@@ -752,7 +773,77 @@ func TestListHandler_Delete_Returns_Service_Error(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	req, _ := http.NewRequest(http.MethodDelete, "/v1/lists/1", nil)
+	req.Header.Add("USER_ID", "1")
+	c.ServeHTTP(w, req)
 
+	assert.Equal(t, http.StatusOK, w.Code)
+}
+
+func TestListHandler_Delete_Error_Getting_List(t *testing.T) {
+
+	userLists := []userListsModel.UserList{userListsModel.UserList{
+		ListID: 1,
+		UserID: 1,
+	}}
+
+	listService := NewMockIListService(gomock.NewController(t))
+
+	userListService := NewMockIUserListService(gomock.NewController(t))
+
+	userListService.EXPECT().GetUserListsByListID(gomock.Any()).Return(&userLists, nil)
+	listService.EXPECT().Get(gomock.Any()).Return(nil, errors.New("error from list service executing get"))
+
+	listHandler := NewListHandler(listService, userListService)
+
+	gin.SetMode(gin.TestMode)
+
+	c := gin.Default()
+
+	v1 := c.Group("/v1/lists")
+	{
+		v1.DELETE("/:id", listHandler.Delete)
+	}
+
+	w := httptest.NewRecorder()
+
+	req, _ := http.NewRequest(http.MethodDelete, "/v1/lists/1", nil)
+	req.Header.Add("USER_ID", "1")
+	c.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+}
+
+func TestListHandler_Delete_Returns_Service_Error(t *testing.T) {
+	validList := GetValidList()
+	userLists := []userListsModel.UserList{{UserID: 1, ListID: 1}}
+	inviteCode, _ := uuid.NewV4()
+	validList.InviteCode = inviteCode.String()
+	validList.UserCreatorID = 1
+	validList.ID = 1
+
+	listService := NewMockIListService(gomock.NewController(t))
+
+	listService.EXPECT().Delete(gomock.Any()).Return(nil, errors.New("error from list service"))
+	userListService := NewMockIUserListService(gomock.NewController(t))
+
+	userListService.EXPECT().GetUserListsByListID(gomock.Any()).Return(&userLists, nil)
+	listService.EXPECT().Get(gomock.Any()).Return(&validList, nil)
+
+	listHandler := NewListHandler(listService, userListService)
+
+	gin.SetMode(gin.TestMode)
+
+	c := gin.Default()
+
+	v1 := c.Group("/v1/lists")
+	{
+		v1.DELETE("/:id", listHandler.Delete)
+	}
+
+	w := httptest.NewRecorder()
+
+	req, _ := http.NewRequest(http.MethodDelete, "/v1/lists/1", nil)
+	req.Header.Add("USER_ID", "1")
 	c.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
@@ -777,16 +868,15 @@ func TestListHandler_Delete_Invalid_ID(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	req, _ := http.NewRequest(http.MethodDelete, "/v1/lists/invalidID", nil)
-
+	req.Header.Add("USER_ID", "1")
 	c.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 }
 
-func TestListHandler_Delete_Returns_Not_Found(t *testing.T) {
+func TestListHandler_Delete_Invalid_User_ID(t *testing.T) {
 
 	listService := NewMockIListService(gomock.NewController(t))
-	listService.EXPECT().Delete(gomock.Any()).Return(nil, nil)
 	userListService := NewMockIUserListService(gomock.NewController(t))
 
 	listHandler := NewListHandler(listService, userListService)
@@ -803,7 +893,40 @@ func TestListHandler_Delete_Returns_Not_Found(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	req, _ := http.NewRequest(http.MethodDelete, "/v1/lists/1", nil)
+	req.Header.Add("USER_ID", "a")
+	c.ServeHTTP(w, req)
 
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+}
+
+func TestListHandler_Delete_Returns_Not_Found(t *testing.T) {
+
+	validList := GetValidList()
+	userLists := []userListsModel.UserList{GetValidUserList()}
+
+	listService := NewMockIListService(gomock.NewController(t))
+	listService.EXPECT().Delete(gomock.Any()).Return(nil, nil)
+
+	userListService := NewMockIUserListService(gomock.NewController(t))
+
+	userListService.EXPECT().GetUserListsByListID(gomock.Any()).Return(&userLists, nil)
+	listService.EXPECT().Get(gomock.Any()).Return(&validList, nil)
+
+	listHandler := NewListHandler(listService, userListService)
+
+	gin.SetMode(gin.TestMode)
+
+	c := gin.Default()
+
+	v1 := c.Group("/v1/lists")
+	{
+		v1.DELETE("/:id", listHandler.Delete)
+	}
+
+	w := httptest.NewRecorder()
+
+	req, _ := http.NewRequest(http.MethodDelete, "/v1/lists/1", nil)
+	req.Header.Add("USER_ID", "1")
 	c.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusNotFound, w.Code)
