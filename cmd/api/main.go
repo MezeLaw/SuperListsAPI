@@ -53,6 +53,7 @@ func main() {
 			lists.GET("/:id", listsHandler.Get)
 			lists.PUT("/:id", listsHandler.Update)
 			lists.DELETE("/:id", listsHandler.Delete)
+			lists.POST("/joinList/:listID", listsHandler.JoinList)
 		}
 
 		userLists := v1.Group("/userLists")

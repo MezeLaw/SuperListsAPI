@@ -153,6 +153,45 @@ func TestAuthRepository_Login(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+func TestAuthRepository_Login_Invalid_Credentials(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+	}
+	defer db.Close()
+
+	gormDb, err := gorm.Open(mysql.New(mysql.Config{
+		Conn:                      db,
+		SkipInitializeWithVersion: true,
+	}), &gorm.Config{
+		Logger: logger.Default.LogMode(logger.Info),
+	})
+
+	if err != nil {
+		t.Error(err.Error())
+	}
+	gormDb.Debug()
+
+	authRepository := NewAuthRepository(gormDb)
+
+	validLogin := GetValidLoginPayload()
+
+	validUser := GetValidUser()
+
+	validUser.HashPassword(validLogin.Password)
+
+	row := sqlmock.NewRows([]string{"id", "name", "email", "password"}).
+		AddRow(1, "Meze", "meze@meze.com", "invalidPassword")
+
+	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `users` WHERE email = ? AND `users`.`deleted_at` IS NULL ORDER BY `users`.`id` LIMIT 1")).
+		WillReturnRows(row)
+
+	result, err := authRepository.Login(*validLogin)
+
+	assert.Nil(t, result)
+	assert.Error(t, err)
+}
+
 func TestAuthRepository_Login_Email_Not_Found(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	if err != nil {

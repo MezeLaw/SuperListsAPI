@@ -300,11 +300,11 @@ func (lh *ListHandler) JoinList(c *gin.Context) {
 	}
 
 	if ul == nil {
-		c.JSON(http.StatusNotFound, fmt.Sprintf("UserList with id %s could not be created", listID))
+		c.JSON(http.StatusNotFound, fmt.Sprintf("Couldnt join to list with id %s . UserList could not be created", listID))
 		return
 	}
 
-	c.JSON(http.StatusOK, ul)
+	c.JSON(http.StatusCreated, ul)
 	return
 }
 

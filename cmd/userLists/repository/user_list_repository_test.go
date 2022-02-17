@@ -298,6 +298,66 @@ func TestUserListRepository_GetUserListsByUserID_Error(t *testing.T) {
 	assert.Error(t, err)
 }
 
+func TestUserListRepository_GetUserListsByListID(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+	}
+	defer db.Close()
+
+	gormDb, err := gorm.Open(mysql.New(mysql.Config{
+		Conn:                      db,
+		SkipInitializeWithVersion: true,
+	}), &gorm.Config{
+		Logger: logger.Default.LogMode(logger.Info),
+	})
+
+	if err != nil {
+		t.Error(err.Error())
+	}
+	gormDb.Debug()
+
+	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `user_lists` WHERE `list_id` = ? AND `user_lists`.`deleted_at` IS NULL")).
+		WillReturnRows(sqlmock.NewRows([]string{"id", "list_id"}).AddRow(1, 1).AddRow(2, 2))
+
+	userListRepo := NewUserListRepository(gormDb)
+
+	result, err := userListRepo.GetUserListsByListID("1")
+
+	assert.NotNil(t, result)
+	assert.NoError(t, err)
+}
+
+func TestUserListRepository_GetUserListsByListID_Error(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+	}
+	defer db.Close()
+
+	gormDb, err := gorm.Open(mysql.New(mysql.Config{
+		Conn:                      db,
+		SkipInitializeWithVersion: true,
+	}), &gorm.Config{
+		Logger: logger.Default.LogMode(logger.Info),
+	})
+
+	if err != nil {
+		t.Error(err.Error())
+	}
+	gormDb.Debug()
+
+	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `user_lists` WHERE `user_lists`.`id` = ? AND `user_lists`.`deleted_at` IS NULL")).
+		WillReturnError(errors.New("error from db on getUserLists by userID method"))
+
+	userListRepo := NewUserListRepository(gormDb)
+
+	result, err := userListRepo.GetUserListsByListID("1")
+
+	assert.Nil(t, result)
+	assert.Error(t, err)
+}
+
 func GetValidUserList() models.UserList {
 	return models.UserList{
 		Model:  gorm.Model{},

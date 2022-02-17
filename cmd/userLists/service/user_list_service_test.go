@@ -158,6 +158,32 @@ func TestUserListService_GetUserListsByUserID_Error(t *testing.T) {
 
 }
 
+func TestUserListService_GetUserListsByListID(t *testing.T) {
+	mockedRepo := NewMockIUserListRepository(gomock.NewController(t))
+	mockedRepo.EXPECT().GetUserListsByListID(gomock.Any()).Return(&[]models.UserList{GetValidUserList()}, nil)
+
+	userListService := NewUserListService(mockedRepo)
+
+	result, err := userListService.GetUserListsByListID("1")
+
+	assert.NoError(t, err)
+	assert.NotNil(t, result)
+
+}
+
+func TestUserListService_GetUserListsByListID_Error(t *testing.T) {
+	mockedRepo := NewMockIUserListRepository(gomock.NewController(t))
+	mockedRepo.EXPECT().GetUserListsByListID(gomock.Any()).Return(nil, errors.New("error from userLists repository"))
+
+	userListService := NewUserListService(mockedRepo)
+
+	result, err := userListService.GetUserListsByListID("1")
+
+	assert.Error(t, err)
+	assert.Nil(t, result)
+
+}
+
 func GetValidUserList() models.UserList {
 	return models.UserList{
 		Model:  gorm.Model{},
