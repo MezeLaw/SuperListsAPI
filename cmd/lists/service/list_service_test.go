@@ -154,7 +154,7 @@ func TestListService_Delete(t *testing.T) {
 	mockedRepo.EXPECT().Delete(gomock.Any()).Return(&deletedId, nil)
 	listService := NewListService(mockedRepo)
 
-	result, err := listService.Delete("1")
+	result, err := listService.Delete([]uint{1})
 
 	assert.NoError(t, err)
 	assert.NotEmpty(t, result)
@@ -166,7 +166,7 @@ func TestListService_Delete_Error(t *testing.T) {
 	mockedRepo.EXPECT().Delete(gomock.Any()).Return(nil, errors.New("error from list repository"))
 	listService := NewListService(mockedRepo)
 
-	result, err := listService.Delete("1")
+	result, err := listService.Delete([]uint{1})
 
 	assert.Error(t, err)
 	assert.Empty(t, result)

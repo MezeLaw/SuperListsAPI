@@ -79,6 +79,21 @@ func (mr *MockIUserListRepositoryMockRecorder) Get(userListID interface{}) *gomo
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockIUserListRepository)(nil).Get), userListID)
 }
 
+// GetUserListsByListID mocks base method.
+func (m *MockIUserListRepository) GetUserListsByListID(listID string) (*[]models.UserList, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetUserListsByListID", listID)
+	ret0, _ := ret[0].(*[]models.UserList)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetUserListsByListID indicates an expected call of GetUserListsByListID.
+func (mr *MockIUserListRepositoryMockRecorder) GetUserListsByListID(listID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserListsByListID", reflect.TypeOf((*MockIUserListRepository)(nil).GetUserListsByListID), listID)
+}
+
 // GetUserListsByUserID mocks base method.
 func (m *MockIUserListRepository) GetUserListsByUserID(userId string) (*[]models.UserList, error) {
 	m.ctrl.T.Helper()

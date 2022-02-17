@@ -9,13 +9,14 @@ import (
 	"strconv"
 )
 
-//go:generate mockgen -source=UserLists.go -destination user_lists_mock.go -package handler
+//go:generate mockgen -source=user_list.go -destination user_lists_mock.go -package handler
 
 type IUserListService interface {
 	Create(list models.UserList) (*models.UserList, error)
 	Get(userListID string) (*models.UserList, error)
 	Delete(userListID string) (*int, error)
 	GetUserListsByUserID(userId string) (*[]models.UserList, error)
+	GetUserListsByListID(listID string) (*[]models.UserList, error)
 }
 
 type UserListHandler struct {

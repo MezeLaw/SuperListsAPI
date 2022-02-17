@@ -31,7 +31,7 @@ func main() {
 
 	listRepository := listRepository.NewListRepository(database.AppDatabase)
 	listService := listService.NewListService(&listRepository)
-	listsHandler := listHandler.NewListHandler(&listService)
+	listsHandler := listHandler.NewListHandler(&listService, &userListService)
 
 	router.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{

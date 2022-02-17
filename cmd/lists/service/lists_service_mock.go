@@ -50,18 +50,18 @@ func (mr *MockIListRepositoryMockRecorder) Create(list interface{}) *gomock.Call
 }
 
 // Delete mocks base method.
-func (m *MockIListRepository) Delete(listId string) (*int, error) {
+func (m *MockIListRepository) Delete(idsToDelete []uint) (*[]uint, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Delete", listId)
-	ret0, _ := ret[0].(*int)
+	ret := m.ctrl.Call(m, "Delete", idsToDelete)
+	ret0, _ := ret[0].(*[]uint)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Delete indicates an expected call of Delete.
-func (mr *MockIListRepositoryMockRecorder) Delete(listId interface{}) *gomock.Call {
+func (mr *MockIListRepositoryMockRecorder) Delete(idsToDelete interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockIListRepository)(nil).Delete), listId)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockIListRepository)(nil).Delete), idsToDelete)
 }
 
 // Get mocks base method.

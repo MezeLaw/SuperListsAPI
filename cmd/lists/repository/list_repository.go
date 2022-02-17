@@ -3,7 +3,6 @@ package repository
 import (
 	"SuperListsAPI/cmd/lists/models"
 	"gorm.io/gorm"
-	"strconv"
 )
 
 type ListRepository struct {
@@ -54,13 +53,12 @@ func (lr *ListRepository) Update(list models.List) (*models.List, error) {
 	return &list, nil
 }
 
-func (lr *ListRepository) Delete(listId string) (*int, error) {
-
-	if result := lr.db.Delete(&models.List{}, listId); result.Error != nil || result.RowsAffected < 1 {
+func (lr *ListRepository) Delete(idsToDelete []uint) (*[]uint, error) {
+	//db.Delete(&users, []int{1,2,3})
+	if result := lr.db.Delete(&models.List{}, idsToDelete); result.Error != nil || result.RowsAffected < 1 {
 		return nil, result.Error
 	}
-	deletedID, _ := strconv.Atoi(listId)
 
-	return &deletedID, nil
+	return &idsToDelete, nil
 
 }

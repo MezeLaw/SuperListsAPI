@@ -9,6 +9,7 @@ type IUserListRepository interface {
 	Get(userListID string) (*models.UserList, error)
 	Delete(userListID string) (*int, error)
 	GetUserListsByUserID(userId string) (*[]models.UserList, error)
+	GetUserListsByListID(listID string) (*[]models.UserList, error)
 }
 
 type UserListService struct {
@@ -33,4 +34,8 @@ func (uls *UserListService) Delete(userListID string) (*int, error) {
 
 func (uls *UserListService) GetUserListsByUserID(userId string) (*[]models.UserList, error) {
 	return uls.userListRepository.GetUserListsByUserID(userId)
+}
+
+func (uls *UserListService) GetUserListsByListID(listID string) (*[]models.UserList, error) {
+	return uls.userListRepository.GetUserListsByListID(listID)
 }
