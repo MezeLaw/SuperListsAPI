@@ -1,6 +1,7 @@
 package main
 
 import (
+	"SuperListsAPI/cmd/api/middleware"
 	"SuperListsAPI/cmd/auth/handler"
 	"SuperListsAPI/cmd/auth/repository"
 	"SuperListsAPI/cmd/auth/service"
@@ -49,19 +50,19 @@ func main() {
 
 		lists := v1.Group("/lists")
 		{
-			lists.POST("/", listsHandler.Create)
-			lists.GET("/:id", listsHandler.Get)
-			lists.PUT("/:id", listsHandler.Update)
-			lists.DELETE("/:id", listsHandler.Delete)
-			lists.POST("/joinList/:listID", listsHandler.JoinList)
+			lists.POST("/", middleware.ValidateJWTOnRequest, listsHandler.Create)
+			lists.GET("/:id", middleware.ValidateJWTOnRequest, listsHandler.Get)
+			lists.PUT("/:id", middleware.ValidateJWTOnRequest, listsHandler.Update)
+			lists.DELETE("/:id", middleware.ValidateJWTOnRequest, listsHandler.Delete)
+			lists.POST("/joinList/:listID", middleware.ValidateJWTOnRequest, listsHandler.JoinList)
 		}
 
 		userLists := v1.Group("/userLists")
 		{
-			userLists.POST("/", userListHandler.Create)
-			userLists.GET("/:id", userListHandler.Get)
-			userLists.GET("/", userListHandler.GetUserListsByUserID)
-			userLists.DELETE("/:id", userListHandler.Delete)
+			userLists.POST("/", middleware.ValidateJWTOnRequest, userListHandler.Create)
+			userLists.GET("/:id", middleware.ValidateJWTOnRequest, userListHandler.Get)
+			userLists.GET("/", middleware.ValidateJWTOnRequest, userListHandler.GetUserListsByUserID)
+			userLists.DELETE("/:id", middleware.ValidateJWTOnRequest, userListHandler.Delete)
 		}
 
 	}
