@@ -52,6 +52,7 @@ func main() {
 		{
 			lists.POST("/", middleware.ValidateJWTOnRequest, listsHandler.Create)
 			lists.GET("/:id", middleware.ValidateJWTOnRequest, listsHandler.Get)
+			lists.GET("/", middleware.ValidateJWTOnRequest, listsHandler.GetLists)
 			lists.PUT("/:id", middleware.ValidateJWTOnRequest, listsHandler.Update)
 			lists.DELETE("/:id", middleware.ValidateJWTOnRequest, listsHandler.Delete)
 			lists.POST("/joinList/:listID", middleware.ValidateJWTOnRequest, listsHandler.JoinList)
