@@ -344,11 +344,10 @@ func TestListRepository_Delete(t *testing.T) {
 
 	listRepository := NewListRepository(gormDb)
 
-	result, err := listRepository.Delete([]uint{1})
+	result, err := listRepository.Delete("1")
 
 	assert.NoError(t, err)
 	assert.NotNil(t, result)
-	assert.Equal(t, *result, []uint{uint(1)})
 }
 
 func TestListRepository_Delete_Error(t *testing.T) {
@@ -377,7 +376,7 @@ func TestListRepository_Delete_Error(t *testing.T) {
 
 	listRepository := NewListRepository(gormDb)
 
-	result, err := listRepository.Delete([]uint{1})
+	result, err := listRepository.Delete("1")
 
 	assert.Error(t, err)
 	assert.Nil(t, result)

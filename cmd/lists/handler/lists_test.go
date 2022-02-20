@@ -1,8 +1,8 @@
 package handler
 
 import (
+	listItemModels "SuperListsAPI/cmd/listItems/models"
 	"SuperListsAPI/cmd/lists/models"
-	"SuperListsAPI/cmd/userLists/handler"
 	userListsModel "SuperListsAPI/cmd/userLists/models"
 	"encoding/json"
 	"errors"
@@ -31,7 +31,8 @@ func TestListHandler_Create(t *testing.T) {
 	userListService := NewMockIUserListService(gomock.NewController(t))
 	userListService.EXPECT().Create(gomock.Any()).Return(&validUserList, nil)
 
-	listHandler := NewListHandler(listService, userListService)
+	listItemService := NewMockIListItemService(gomock.NewController(t))
+	listHandler := NewListHandler(listService, userListService, listItemService)
 
 	gin.SetMode(gin.TestMode)
 
@@ -66,7 +67,8 @@ func TestListHandler_Create_Returns_Service_Error(t *testing.T) {
 	listService := NewMockIListService(gomock.NewController(t))
 	listService.EXPECT().Create(gomock.Any()).Return(nil, errors.New("error from list service"))
 	userListService := NewMockIUserListService(gomock.NewController(t))
-	listHandler := NewListHandler(listService, userListService)
+	listItemService := NewMockIListItemService(gomock.NewController(t))
+	listHandler := NewListHandler(listService, userListService, listItemService)
 
 	gin.SetMode(gin.TestMode)
 
@@ -103,7 +105,8 @@ func TestListHandler_Create_Error_On_User_List_Service(t *testing.T) {
 	userListService := NewMockIUserListService(gomock.NewController(t))
 	userListService.EXPECT().Create(gomock.Any()).Return(nil, errors.New("error on userList service"))
 
-	listHandler := NewListHandler(listService, userListService)
+	listItemService := NewMockIListItemService(gomock.NewController(t))
+	listHandler := NewListHandler(listService, userListService, listItemService)
 
 	gin.SetMode(gin.TestMode)
 
@@ -134,7 +137,8 @@ func TestListHandler_Create_Missing_Required_Value(t *testing.T) {
 
 	listService := NewMockIListService(gomock.NewController(t))
 	userListService := NewMockIUserListService(gomock.NewController(t))
-	listHandler := NewListHandler(listService, userListService)
+	listItemService := NewMockIListItemService(gomock.NewController(t))
+	listHandler := NewListHandler(listService, userListService, listItemService)
 
 	gin.SetMode(gin.TestMode)
 
@@ -165,7 +169,8 @@ func TestListHandler_Create_Invalid_Request_Body(t *testing.T) {
 
 	listService := NewMockIListService(gomock.NewController(t))
 	userListService := NewMockIUserListService(gomock.NewController(t))
-	listHandler := NewListHandler(listService, userListService)
+	listItemService := NewMockIListItemService(gomock.NewController(t))
+	listHandler := NewListHandler(listService, userListService, listItemService)
 
 	gin.SetMode(gin.TestMode)
 
@@ -199,7 +204,8 @@ func TestListHandler_GetLists(t *testing.T) {
 	listService := NewMockIListService(gomock.NewController(t))
 	listService.EXPECT().GetLists(gomock.Any()).Return(&lists, nil)
 	userListService := NewMockIUserListService(gomock.NewController(t))
-	listHandler := NewListHandler(listService, userListService)
+	listItemService := NewMockIListItemService(gomock.NewController(t))
+	listHandler := NewListHandler(listService, userListService, listItemService)
 
 	gin.SetMode(gin.TestMode)
 
@@ -231,7 +237,8 @@ func TestListHandler_GetLists_Returns_Service_Error(t *testing.T) {
 	listService := NewMockIListService(gomock.NewController(t))
 	listService.EXPECT().GetLists(gomock.Any()).Return(&lists, errors.New("error from list service"))
 	userListService := NewMockIUserListService(gomock.NewController(t))
-	listHandler := NewListHandler(listService, userListService)
+	listItemService := NewMockIListItemService(gomock.NewController(t))
+	listHandler := NewListHandler(listService, userListService, listItemService)
 
 	gin.SetMode(gin.TestMode)
 
@@ -261,7 +268,8 @@ func TestListHandler_GetLists_Returns_No_Header_ID_Error(t *testing.T) {
 
 	listService := NewMockIListService(gomock.NewController(t))
 	userListService := NewMockIUserListService(gomock.NewController(t))
-	listHandler := NewListHandler(listService, userListService)
+	listItemService := NewMockIListItemService(gomock.NewController(t))
+	listHandler := NewListHandler(listService, userListService, listItemService)
 
 	gin.SetMode(gin.TestMode)
 
@@ -291,7 +299,8 @@ func TestListHandler_GetLists_Returns_Invalid_ID_Error(t *testing.T) {
 	listService := NewMockIListService(gomock.NewController(t))
 	userListService := NewMockIUserListService(gomock.NewController(t))
 
-	listHandler := NewListHandler(listService, userListService)
+	listItemService := NewMockIListItemService(gomock.NewController(t))
+	listHandler := NewListHandler(listService, userListService, listItemService)
 
 	gin.SetMode(gin.TestMode)
 
@@ -322,7 +331,8 @@ func TestListHandler_GetLists_Returns_No_Content(t *testing.T) {
 	listService.EXPECT().GetLists(gomock.Any()).Return(nil, nil)
 	userListService := NewMockIUserListService(gomock.NewController(t))
 
-	listHandler := NewListHandler(listService, userListService)
+	listItemService := NewMockIListItemService(gomock.NewController(t))
+	listHandler := NewListHandler(listService, userListService, listItemService)
 
 	gin.SetMode(gin.TestMode)
 
@@ -354,7 +364,8 @@ func TestListHandler_GetLists_Returns_No_Content_With_Lists_Not_Nil(t *testing.T
 	listService.EXPECT().GetLists(gomock.Any()).Return(&[]models.List{}, nil)
 	userListService := NewMockIUserListService(gomock.NewController(t))
 
-	listHandler := NewListHandler(listService, userListService)
+	listItemService := NewMockIListItemService(gomock.NewController(t))
+	listHandler := NewListHandler(listService, userListService, listItemService)
 
 	gin.SetMode(gin.TestMode)
 
@@ -378,6 +389,10 @@ func TestListHandler_GetLists_Returns_No_Content_With_Lists_Not_Nil(t *testing.T
 func TestListHandler_Get(t *testing.T) {
 	validList := GetValidList()
 
+	validListItem := GetValidListItem()
+
+	listItemsReturned := []listItemModels.ListItem{validListItem}
+
 	inviteCode, _ := uuid.NewV4()
 	validList.InviteCode = inviteCode.String()
 	validList.UserCreatorID = 1
@@ -386,7 +401,9 @@ func TestListHandler_Get(t *testing.T) {
 	listService.EXPECT().Get(gomock.Any()).Return(&validList, nil)
 	userListService := NewMockIUserListService(gomock.NewController(t))
 
-	listHandler := NewListHandler(listService, userListService)
+	listItemService := NewMockIListItemService(gomock.NewController(t))
+	listItemService.EXPECT().GetItemsListByListID(gomock.Any()).Return(&listItemsReturned, nil)
+	listHandler := NewListHandler(listService, userListService, listItemService)
 
 	gin.SetMode(gin.TestMode)
 
@@ -406,13 +423,47 @@ func TestListHandler_Get(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 }
 
+func TestListHandler_Get_Error_On_ListItem_Service(t *testing.T) {
+	validList := GetValidList()
+
+	inviteCode, _ := uuid.NewV4()
+	validList.InviteCode = inviteCode.String()
+	validList.UserCreatorID = 1
+
+	listService := NewMockIListService(gomock.NewController(t))
+	listService.EXPECT().Get(gomock.Any()).Return(&validList, nil)
+	userListService := NewMockIUserListService(gomock.NewController(t))
+
+	listItemService := NewMockIListItemService(gomock.NewController(t))
+	listItemService.EXPECT().GetItemsListByListID(gomock.Any()).Return(nil, errors.New("error from list item service"))
+	listHandler := NewListHandler(listService, userListService, listItemService)
+
+	gin.SetMode(gin.TestMode)
+
+	c := gin.Default()
+
+	v1 := c.Group("/v1/lists")
+	{
+		v1.GET("/:id", listHandler.Get)
+	}
+
+	w := httptest.NewRecorder()
+
+	req, _ := http.NewRequest(http.MethodGet, "/v1/lists/1", nil)
+
+	c.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+}
+
 func TestListHandler_Get_Returns_Not_Found(t *testing.T) {
 
 	listService := NewMockIListService(gomock.NewController(t))
 	listService.EXPECT().Get(gomock.Any()).Return(nil, nil)
 	userListService := NewMockIUserListService(gomock.NewController(t))
 
-	listHandler := NewListHandler(listService, userListService)
+	listItemService := NewMockIListItemService(gomock.NewController(t))
+	listHandler := NewListHandler(listService, userListService, listItemService)
 
 	gin.SetMode(gin.TestMode)
 
@@ -443,7 +494,8 @@ func TestListHandler_Get_Returns_Service_Error(t *testing.T) {
 	listService.EXPECT().Get(gomock.Any()).Return(&validList, errors.New("list service error"))
 	userListService := NewMockIUserListService(gomock.NewController(t))
 
-	listHandler := NewListHandler(listService, userListService)
+	listItemService := NewMockIListItemService(gomock.NewController(t))
+	listHandler := NewListHandler(listService, userListService, listItemService)
 
 	gin.SetMode(gin.TestMode)
 
@@ -473,7 +525,8 @@ func TestListHandler_Get_Missing_ID_On_URL(t *testing.T) {
 	listService := NewMockIListService(gomock.NewController(t))
 	userListService := NewMockIUserListService(gomock.NewController(t))
 
-	listHandler := NewListHandler(listService, userListService)
+	listItemService := NewMockIListItemService(gomock.NewController(t))
+	listHandler := NewListHandler(listService, userListService, listItemService)
 
 	gin.SetMode(gin.TestMode)
 
@@ -506,7 +559,8 @@ func TestListHandler_Update(t *testing.T) {
 	listService.EXPECT().Update(gomock.Any()).Return(&validList, nil)
 	userListService := NewMockIUserListService(gomock.NewController(t))
 
-	listHandler := NewListHandler(listService, userListService)
+	listItemService := NewMockIListItemService(gomock.NewController(t))
+	listHandler := NewListHandler(listService, userListService, listItemService)
 
 	gin.SetMode(gin.TestMode)
 
@@ -541,7 +595,8 @@ func TestListHandler_Update_Returns_Service_Error(t *testing.T) {
 	listService.EXPECT().Update(gomock.Any()).Return(&validList, errors.New("error from list service"))
 	userListService := NewMockIUserListService(gomock.NewController(t))
 
-	listHandler := NewListHandler(listService, userListService)
+	listItemService := NewMockIListItemService(gomock.NewController(t))
+	listHandler := NewListHandler(listService, userListService, listItemService)
 
 	gin.SetMode(gin.TestMode)
 
@@ -575,7 +630,8 @@ func TestListHandler_Update_Invalid_ID(t *testing.T) {
 	listService := NewMockIListService(gomock.NewController(t))
 	userListService := NewMockIUserListService(gomock.NewController(t))
 
-	listHandler := NewListHandler(listService, userListService)
+	listItemService := NewMockIListItemService(gomock.NewController(t))
+	listHandler := NewListHandler(listService, userListService, listItemService)
 
 	gin.SetMode(gin.TestMode)
 
@@ -609,7 +665,8 @@ func TestListHandler_Update_Mismatch_ID(t *testing.T) {
 	listService := NewMockIListService(gomock.NewController(t))
 	userListService := NewMockIUserListService(gomock.NewController(t))
 
-	listHandler := NewListHandler(listService, userListService)
+	listItemService := NewMockIListItemService(gomock.NewController(t))
+	listHandler := NewListHandler(listService, userListService, listItemService)
 
 	gin.SetMode(gin.TestMode)
 
@@ -640,7 +697,8 @@ func TestListHandler_Update_Invalid_Request_Body(t *testing.T) {
 	listService := NewMockIListService(gomock.NewController(t))
 	userListService := NewMockIUserListService(gomock.NewController(t))
 
-	listHandler := NewListHandler(listService, userListService)
+	listItemService := NewMockIListItemService(gomock.NewController(t))
+	listHandler := NewListHandler(listService, userListService, listItemService)
 
 	gin.SetMode(gin.TestMode)
 
@@ -672,7 +730,8 @@ func TestListHandler_Update_Missing_Request_Body_Mandatory_Values(t *testing.T) 
 	listService := NewMockIListService(gomock.NewController(t))
 	userListService := NewMockIUserListService(gomock.NewController(t))
 
-	listHandler := NewListHandler(listService, userListService)
+	listItemService := NewMockIListItemService(gomock.NewController(t))
+	listHandler := NewListHandler(listService, userListService, listItemService)
 
 	gin.SetMode(gin.TestMode)
 
@@ -707,7 +766,8 @@ func TestListHandler_Update_Returns_Not_Found_List_To_Update(t *testing.T) {
 	listService.EXPECT().Update(gomock.Any()).Return(nil, nil)
 	userListService := NewMockIUserListService(gomock.NewController(t))
 
-	listHandler := NewListHandler(listService, userListService)
+	listItemService := NewMockIListItemService(gomock.NewController(t))
+	listHandler := NewListHandler(listService, userListService, listItemService)
 
 	gin.SetMode(gin.TestMode)
 
@@ -731,27 +791,39 @@ func TestListHandler_Update_Returns_Not_Found_List_To_Update(t *testing.T) {
 
 func TestListHandler_Delete(t *testing.T) {
 	validList := GetValidList()
-	userLists := []userListsModel.UserList{userListsModel.UserList{
+
+	deletedUserListID := 1
+
+	userList := userListsModel.UserList{
 		ListID: 1,
 		UserID: 1,
-	}}
+	}
+
+	userList.ID = 1
+
+	userLists := []userListsModel.UserList{userList}
 	inviteCode, _ := uuid.NewV4()
 	validList.InviteCode = inviteCode.String()
 	validList.UserCreatorID = 1
 	validList.ID = 1
 
-	deletedIDs := []uint{uint(1)}
+	deletedID := "1"
+	deletedListItemQty := 1
 
 	listService := NewMockIListService(gomock.NewController(t))
 
-	listService.EXPECT().Delete(gomock.Any()).Return(&deletedIDs, nil)
+	listService.EXPECT().Delete(gomock.Any()).Return(&deletedID, nil)
 
 	userListService := NewMockIUserListService(gomock.NewController(t))
 
 	userListService.EXPECT().GetUserListsByListID(gomock.Any()).Return(&userLists, nil)
+	userListService.EXPECT().Delete(gomock.Any()).Return(&deletedUserListID, nil)
+
 	listService.EXPECT().Get(gomock.Any()).Return(&validList, nil)
 
-	listHandler := NewListHandler(listService, userListService)
+	listItemService := NewMockIListItemService(gomock.NewController(t))
+	listItemService.EXPECT().DeleteListItemsByListID(gomock.Any()).Return(&deletedListItemQty, nil)
+	listHandler := NewListHandler(listService, userListService, listItemService)
 
 	gin.SetMode(gin.TestMode)
 
@@ -771,6 +843,159 @@ func TestListHandler_Delete(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 }
 
+func TestListHandler_Delete_List_Item_Service_Error(t *testing.T) {
+	validList := GetValidList()
+
+	deletedUserListID := 1
+
+	userList := userListsModel.UserList{
+		ListID: 1,
+		UserID: 1,
+	}
+
+	userList.ID = 1
+
+	userLists := []userListsModel.UserList{userList}
+	inviteCode, _ := uuid.NewV4()
+	validList.InviteCode = inviteCode.String()
+	validList.UserCreatorID = 1
+	validList.ID = 1
+
+	deletedID := "1"
+
+	listService := NewMockIListService(gomock.NewController(t))
+
+	listService.EXPECT().Delete(gomock.Any()).Return(&deletedID, nil)
+
+	userListService := NewMockIUserListService(gomock.NewController(t))
+
+	userListService.EXPECT().GetUserListsByListID(gomock.Any()).Return(&userLists, nil)
+	userListService.EXPECT().Delete(gomock.Any()).Return(&deletedUserListID, nil)
+
+	listService.EXPECT().Get(gomock.Any()).Return(&validList, nil)
+
+	listItemService := NewMockIListItemService(gomock.NewController(t))
+	listItemService.EXPECT().DeleteListItemsByListID(gomock.Any()).Return(nil, errors.New("Error on listItemService"))
+	listHandler := NewListHandler(listService, userListService, listItemService)
+
+	gin.SetMode(gin.TestMode)
+
+	c := gin.Default()
+
+	v1 := c.Group("/v1/lists")
+	{
+		v1.DELETE("/:id", listHandler.Delete)
+	}
+
+	w := httptest.NewRecorder()
+
+	req, _ := http.NewRequest(http.MethodDelete, "/v1/lists/1", nil)
+	req.Header.Add("USER_ID", "1")
+	c.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+}
+
+func TestListHandler_Delete_Error_On_User_List_Service(t *testing.T) {
+	validList := GetValidList()
+
+	userList := userListsModel.UserList{
+		ListID: 1,
+		UserID: 1,
+	}
+
+	userList.ID = 1
+
+	userLists := []userListsModel.UserList{userList}
+	inviteCode, _ := uuid.NewV4()
+	validList.InviteCode = inviteCode.String()
+	validList.UserCreatorID = 1
+	validList.ID = 1
+
+	deletedID := "1"
+
+	listService := NewMockIListService(gomock.NewController(t))
+
+	listService.EXPECT().Delete(gomock.Any()).Return(&deletedID, nil)
+
+	userListService := NewMockIUserListService(gomock.NewController(t))
+
+	userListService.EXPECT().GetUserListsByListID(gomock.Any()).Return(&userLists, nil)
+	userListService.EXPECT().Delete(gomock.Any()).Return(nil, errors.New("error from user list service"))
+
+	listService.EXPECT().Get(gomock.Any()).Return(&validList, nil)
+
+	listItemService := NewMockIListItemService(gomock.NewController(t))
+	listHandler := NewListHandler(listService, userListService, listItemService)
+
+	gin.SetMode(gin.TestMode)
+
+	c := gin.Default()
+
+	v1 := c.Group("/v1/lists")
+	{
+		v1.DELETE("/:id", listHandler.Delete)
+	}
+
+	w := httptest.NewRecorder()
+
+	req, _ := http.NewRequest(http.MethodDelete, "/v1/lists/1", nil)
+	req.Header.Add("USER_ID", "1")
+	c.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+}
+
+func TestListHandler_Delete_Error_On_User_List_Service_Nil_Results(t *testing.T) {
+	validList := GetValidList()
+
+	userList := userListsModel.UserList{
+		ListID: 1,
+		UserID: 1,
+	}
+
+	userList.ID = 1
+
+	userLists := []userListsModel.UserList{userList}
+	inviteCode, _ := uuid.NewV4()
+	validList.InviteCode = inviteCode.String()
+	validList.UserCreatorID = 1
+	validList.ID = 1
+
+	deletedID := "1"
+
+	listService := NewMockIListService(gomock.NewController(t))
+
+	listService.EXPECT().Delete(gomock.Any()).Return(&deletedID, nil)
+
+	userListService := NewMockIUserListService(gomock.NewController(t))
+
+	userListService.EXPECT().GetUserListsByListID(gomock.Any()).Return(&userLists, nil)
+	userListService.EXPECT().Delete(gomock.Any()).Return(nil, nil)
+
+	listService.EXPECT().Get(gomock.Any()).Return(&validList, nil)
+
+	listItemService := NewMockIListItemService(gomock.NewController(t))
+	listHandler := NewListHandler(listService, userListService, listItemService)
+
+	gin.SetMode(gin.TestMode)
+
+	c := gin.Default()
+
+	v1 := c.Group("/v1/lists")
+	{
+		v1.DELETE("/:id", listHandler.Delete)
+	}
+
+	w := httptest.NewRecorder()
+
+	req, _ := http.NewRequest(http.MethodDelete, "/v1/lists/1", nil)
+	req.Header.Add("USER_ID", "1")
+	c.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusNotFound, w.Code)
+}
+
 func TestListHandler_Delete_Not_Owner_List(t *testing.T) {
 	validList := GetValidList()
 	userLists := []userListsModel.UserList{userListsModel.UserList{
@@ -785,18 +1010,21 @@ func TestListHandler_Delete_Not_Owner_List(t *testing.T) {
 	validList.UserCreatorID = 2
 	validList.ID = 1
 
-	deletedIDs := []uint{uint(1)}
+	deletedUserListQty := 1
+	listItemDeletedQty := 1
 
 	listService := NewMockIListService(gomock.NewController(t))
 
-	listService.EXPECT().Delete(gomock.Any()).Return(&deletedIDs, nil)
 	listService.EXPECT().Get(gomock.Any()).Return(&validList, nil)
 
 	userListService := NewMockIUserListService(gomock.NewController(t))
 
 	userListService.EXPECT().GetUserListsByListID(gomock.Any()).Return(&userLists, nil)
+	userListService.EXPECT().Delete(gomock.Any()).Return(&deletedUserListQty, nil)
 
-	listHandler := NewListHandler(listService, userListService)
+	listItemService := NewMockIListItemService(gomock.NewController(t))
+	listItemService.EXPECT().DeleteListItemsByListID(gomock.Any()).Return(&listItemDeletedQty, nil)
+	listHandler := NewListHandler(listService, userListService, listItemService)
 
 	gin.SetMode(gin.TestMode)
 
@@ -830,7 +1058,8 @@ func TestListHandler_Delete_Error_Getting_List(t *testing.T) {
 	userListService.EXPECT().GetUserListsByListID(gomock.Any()).Return(&userLists, nil)
 	listService.EXPECT().Get(gomock.Any()).Return(nil, errors.New("error from list service executing get"))
 
-	listHandler := NewListHandler(listService, userListService)
+	listItemService := NewMockIListItemService(gomock.NewController(t))
+	listHandler := NewListHandler(listService, userListService, listItemService)
 
 	gin.SetMode(gin.TestMode)
 
@@ -866,7 +1095,8 @@ func TestListHandler_Delete_Returns_Service_Error(t *testing.T) {
 	userListService.EXPECT().GetUserListsByListID(gomock.Any()).Return(&userLists, nil)
 	listService.EXPECT().Get(gomock.Any()).Return(&validList, nil)
 
-	listHandler := NewListHandler(listService, userListService)
+	listItemService := NewMockIListItemService(gomock.NewController(t))
+	listHandler := NewListHandler(listService, userListService, listItemService)
 
 	gin.SetMode(gin.TestMode)
 
@@ -891,7 +1121,8 @@ func TestListHandler_Delete_Invalid_ID(t *testing.T) {
 	listService := NewMockIListService(gomock.NewController(t))
 	userListService := NewMockIUserListService(gomock.NewController(t))
 
-	listHandler := NewListHandler(listService, userListService)
+	listItemService := NewMockIListItemService(gomock.NewController(t))
+	listHandler := NewListHandler(listService, userListService, listItemService)
 
 	gin.SetMode(gin.TestMode)
 
@@ -916,7 +1147,8 @@ func TestListHandler_Delete_Invalid_User_ID(t *testing.T) {
 	listService := NewMockIListService(gomock.NewController(t))
 	userListService := NewMockIUserListService(gomock.NewController(t))
 
-	listHandler := NewListHandler(listService, userListService)
+	listItemService := NewMockIListItemService(gomock.NewController(t))
+	listHandler := NewListHandler(listService, userListService, listItemService)
 
 	gin.SetMode(gin.TestMode)
 
@@ -941,7 +1173,8 @@ func TestListHandler_Delete_Missing_User_ID(t *testing.T) {
 	listService := NewMockIListService(gomock.NewController(t))
 	userListService := NewMockIUserListService(gomock.NewController(t))
 
-	listHandler := NewListHandler(listService, userListService)
+	listItemService := NewMockIListItemService(gomock.NewController(t))
+	listHandler := NewListHandler(listService, userListService, listItemService)
 
 	gin.SetMode(gin.TestMode)
 
@@ -961,20 +1194,23 @@ func TestListHandler_Delete_Missing_User_ID(t *testing.T) {
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 }
 
-func TestListHandler_Delete_Returns_Not_Found(t *testing.T) {
-
+func TestListHandler_Delete_Returns_Error_On_User_Lists_Delete(t *testing.T) {
+	rowsQtyDeleted := 1
 	validList := GetValidList()
 	userLists := []userListsModel.UserList{GetValidUserList()}
 
 	listService := NewMockIListService(gomock.NewController(t))
-	listService.EXPECT().Delete(gomock.Any()).Return(nil, nil)
 
 	userListService := NewMockIUserListService(gomock.NewController(t))
 
 	userListService.EXPECT().GetUserListsByListID(gomock.Any()).Return(&userLists, nil)
 	listService.EXPECT().Get(gomock.Any()).Return(&validList, nil)
 
-	listHandler := NewListHandler(listService, userListService)
+	userListService.EXPECT().Delete(gomock.Any()).Return(&rowsQtyDeleted, nil)
+
+	listItemService := NewMockIListItemService(gomock.NewController(t))
+	listItemService.EXPECT().DeleteListItemsByListID(gomock.Any()).Return(nil, errors.New("error from list items service"))
+	listHandler := NewListHandler(listService, userListService, listItemService)
 
 	gin.SetMode(gin.TestMode)
 
@@ -991,7 +1227,7 @@ func TestListHandler_Delete_Returns_Not_Found(t *testing.T) {
 	req.Header.Add("USER_ID", "1")
 	c.ServeHTTP(w, req)
 
-	assert.Equal(t, http.StatusNotFound, w.Code)
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
 }
 
 func GetValidList() models.List {
@@ -1008,6 +1244,16 @@ func GetValidUserList() userListsModel.UserList {
 	}
 }
 
+func GetValidListItem() listItemModels.ListItem {
+	return listItemModels.ListItem{
+		ListID:      1,
+		UserID:      1,
+		Title:       "Trabajar",
+		Description: "Programar 9 horas como mono",
+		IsDone:      false,
+	}
+}
+
 func TestListHandler_JoinList(t *testing.T) {
 
 	getValidUserList := GetValidUserList()
@@ -1015,7 +1261,8 @@ func TestListHandler_JoinList(t *testing.T) {
 	listService := NewMockIListService(gomock.NewController(t))
 	userListService := NewMockIUserListService(gomock.NewController(t))
 
-	listHandler := NewListHandler(listService, userListService)
+	listItemService := NewMockIListItemService(gomock.NewController(t))
+	listHandler := NewListHandler(listService, userListService, listItemService)
 
 	userListService.EXPECT().Create(gomock.Any()).Return(&getValidUserList, nil)
 
@@ -1042,7 +1289,8 @@ func TestListHandler_JoinList_No_Cant_Join(t *testing.T) {
 	listService := NewMockIListService(gomock.NewController(t))
 	userListService := NewMockIUserListService(gomock.NewController(t))
 
-	listHandler := NewListHandler(listService, userListService)
+	listItemService := NewMockIListItemService(gomock.NewController(t))
+	listHandler := NewListHandler(listService, userListService, listItemService)
 
 	userListService.EXPECT().Create(gomock.Any()).Return(nil, nil)
 
@@ -1069,7 +1317,8 @@ func TestListHandler_JoinList_Error(t *testing.T) {
 	listService := NewMockIListService(gomock.NewController(t))
 	userListService := NewMockIUserListService(gomock.NewController(t))
 
-	listHandler := NewListHandler(listService, userListService)
+	listItemService := NewMockIListItemService(gomock.NewController(t))
+	listHandler := NewListHandler(listService, userListService, listItemService)
 
 	userListService.EXPECT().Create(gomock.Any()).Return(nil, errors.New("error from userList service"))
 
@@ -1096,7 +1345,8 @@ func TestListHandler_JoinList_Invalid_List_ID(t *testing.T) {
 	listService := NewMockIListService(gomock.NewController(t))
 	userListService := NewMockIUserListService(gomock.NewController(t))
 
-	listHandler := NewListHandler(listService, userListService)
+	listItemService := NewMockIListItemService(gomock.NewController(t))
+	listHandler := NewListHandler(listService, userListService, listItemService)
 
 	gin.SetMode(gin.TestMode)
 
@@ -1121,7 +1371,8 @@ func TestListHandler_JoinList_Missing_User_ID(t *testing.T) {
 	listService := NewMockIListService(gomock.NewController(t))
 	userListService := NewMockIUserListService(gomock.NewController(t))
 
-	listHandler := NewListHandler(listService, userListService)
+	listItemService := NewMockIListItemService(gomock.NewController(t))
+	listHandler := NewListHandler(listService, userListService, listItemService)
 
 	gin.SetMode(gin.TestMode)
 
@@ -1142,8 +1393,9 @@ func TestListHandler_JoinList_Missing_User_ID(t *testing.T) {
 
 func TestNewListHandler(t *testing.T) {
 	type args struct {
-		service         IListService
-		userListService handler.IUserListService
+		service          IListService
+		userListService  IUserListService
+		listItemsService IListItemService
 	}
 	tests := []struct {
 		name string
@@ -1151,22 +1403,27 @@ func TestNewListHandler(t *testing.T) {
 		want ListHandler
 	}{
 		{
-			name: "Test with nil service should pass",
-			args: args{service: nil},
-			want: NewListHandler(nil, nil),
+			name: "Test with nil services should pass",
+			args: args{
+				service:          nil,
+				userListService:  nil,
+				listItemsService: nil,
+			},
+			want: NewListHandler(nil, nil, nil),
 		},
 		{
-			name: "Test with no nil service should pass",
+			name: "Test with no nil services should pass",
 			args: args{
-				service:         NewMockIListService(gomock.NewController(t)),
-				userListService: NewMockIUserListService(gomock.NewController(t)),
+				service:          NewMockIListService(gomock.NewController(t)),
+				userListService:  NewMockIUserListService(gomock.NewController(t)),
+				listItemsService: NewMockIListItemService(gomock.NewController(t)),
 			},
-			want: NewListHandler(NewMockIListService(gomock.NewController(t)), NewMockIUserListService(gomock.NewController(t))),
+			want: NewListHandler(NewMockIListService(gomock.NewController(t)), NewMockIUserListService(gomock.NewController(t)), NewMockIListItemService(gomock.NewController(t))),
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			assert.Equalf(t, tt.want, NewListHandler(tt.args.service, tt.args.userListService), "NewListHandler(%v, %v)", tt.args.service, tt.args.userListService)
+			assert.Equalf(t, tt.want, NewListHandler(tt.args.service, tt.args.userListService, tt.args.listItemsService), "NewListHandler(%v, %v, %v)", tt.args.service, tt.args.userListService, tt.args.listItemsService)
 		})
 	}
 }

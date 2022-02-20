@@ -53,12 +53,12 @@ func (lr *ListRepository) Update(list models.List) (*models.List, error) {
 	return &list, nil
 }
 
-func (lr *ListRepository) Delete(idsToDelete []uint) (*[]uint, error) {
+func (lr *ListRepository) Delete(idToDelete string) (*string, error) {
 	//db.Delete(&users, []int{1,2,3})
-	if result := lr.db.Delete(&models.List{}, idsToDelete); result.Error != nil || result.RowsAffected < 1 {
+	if result := lr.db.Delete(&models.List{}, idToDelete); result.Error != nil || result.RowsAffected < 1 {
 		return nil, result.Error
 	}
 
-	return &idsToDelete, nil
+	return &idToDelete, nil
 
 }

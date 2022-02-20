@@ -50,18 +50,18 @@ func (mr *MockIUserListServiceMockRecorder) Create(list interface{}) *gomock.Cal
 }
 
 // Delete mocks base method.
-func (m *MockIUserListService) Delete(userListID string) (*int, error) {
+func (m *MockIUserListService) Delete(userListIDToDelete *[]uint) (*int, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Delete", userListID)
+	ret := m.ctrl.Call(m, "Delete", userListIDToDelete)
 	ret0, _ := ret[0].(*int)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Delete indicates an expected call of Delete.
-func (mr *MockIUserListServiceMockRecorder) Delete(userListID interface{}) *gomock.Call {
+func (mr *MockIUserListServiceMockRecorder) Delete(userListIDToDelete interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockIUserListService)(nil).Delete), userListID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockIUserListService)(nil).Delete), userListIDToDelete)
 }
 
 // Get mocks base method.

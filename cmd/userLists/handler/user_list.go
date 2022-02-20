@@ -14,7 +14,7 @@ import (
 type IUserListService interface {
 	Create(list models.UserList) (*models.UserList, error)
 	Get(userListID string) (*models.UserList, error)
-	Delete(userListID string) (*int, error)
+	Delete(userListIDToDelete *[]uint) (*int, error)
 	GetUserListsByUserID(userId string) (*[]models.UserList, error)
 	GetUserListsByListID(listID string) (*[]models.UserList, error)
 }
@@ -90,7 +90,8 @@ func (ulh *UserListHandler) Get(c *gin.Context) {
 func (ulh *UserListHandler) Delete(c *gin.Context) {
 	userListID := c.Param("id")
 
-	if _, err := strconv.Atoi(userListID); err != nil {
+	parsedUserListID, err := strconv.Atoi(userListID)
+	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"msg": "invalid list id",
 		})
@@ -98,7 +99,9 @@ func (ulh *UserListHandler) Delete(c *gin.Context) {
 		return
 	}
 
-	deletedUserListID, err := ulh.userListService.Delete(userListID)
+	userListToDelete := []uint{uint(parsedUserListID)}
+
+	deletedUserListID, err := ulh.userListService.Delete(&userListToDelete)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err)

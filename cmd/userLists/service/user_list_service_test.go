@@ -104,13 +104,17 @@ func TestUserListService_Get_Error(t *testing.T) {
 }
 
 func TestUserListService_Delete(t *testing.T) {
-	deletedID := 1
+
+	idsToDelete := []uint{uint(1)}
+
+	qtyReturned := 1
+
 	mockedRepository := NewMockIUserListRepository(gomock.NewController(t))
-	mockedRepository.EXPECT().Delete(gomock.Any()).Return(&deletedID, nil)
+	mockedRepository.EXPECT().Delete(gomock.Any()).Return(&qtyReturned, nil)
 
 	userListService := NewUserListService(mockedRepository)
 
-	result, err := userListService.Delete("1")
+	result, err := userListService.Delete(&idsToDelete)
 
 	assert.NoError(t, err)
 	assert.NotNil(t, result)
@@ -120,12 +124,14 @@ func TestUserListService_Delete(t *testing.T) {
 
 func TestUserListService_Delete_Error(t *testing.T) {
 
+	idsToDelete := []uint{uint(1)}
+
 	mockedRepository := NewMockIUserListRepository(gomock.NewController(t))
 	mockedRepository.EXPECT().Delete(gomock.Any()).Return(nil, errors.New("error from userList repository"))
 
 	userListService := NewUserListService(mockedRepository)
 
-	result, err := userListService.Delete("1")
+	result, err := userListService.Delete(&idsToDelete)
 
 	assert.Error(t, err)
 	assert.Nil(t, result)

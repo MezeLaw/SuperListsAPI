@@ -50,7 +50,7 @@ func (mr *MockIUserListRepositoryMockRecorder) Create(list interface{}) *gomock.
 }
 
 // Delete mocks base method.
-func (m *MockIUserListRepository) Delete(userListID string) (*int, error) {
+func (m *MockIUserListRepository) Delete(userListID *[]uint) (*int, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Delete", userListID)
 	ret0, _ := ret[0].(*int)

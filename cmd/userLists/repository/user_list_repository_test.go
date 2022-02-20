@@ -170,6 +170,7 @@ func TestUserListRepository_Get_Error(t *testing.T) {
 }
 
 func TestUserListRepository_Delete(t *testing.T) {
+
 	db, mock, err := sqlmock.New()
 	if err != nil {
 		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
@@ -195,8 +196,9 @@ func TestUserListRepository_Delete(t *testing.T) {
 	mock.ExpectCommit()
 
 	userListRepository := NewUserListRepository(gormDb)
+	idsToDelete := []uint{uint(1)}
 
-	result, err := userListRepository.Delete("1")
+	result, err := userListRepository.Delete(&idsToDelete)
 
 	assert.NotNil(t, result)
 	assert.NoError(t, err)
@@ -231,7 +233,9 @@ func TestUserListRepository_Delete_Error(t *testing.T) {
 
 	userListRepository := NewUserListRepository(gormDb)
 
-	result, err := userListRepository.Delete("1")
+	idsToDelete := []uint{uint(1)}
+
+	result, err := userListRepository.Delete(&idsToDelete)
 
 	assert.Nil(t, result)
 	assert.Error(t, err)

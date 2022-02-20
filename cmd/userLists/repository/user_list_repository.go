@@ -3,7 +3,6 @@ package repository
 import (
 	"SuperListsAPI/cmd/userLists/models"
 	"gorm.io/gorm"
-	"strconv"
 )
 
 type UserListRepository struct {
@@ -32,15 +31,17 @@ func (ulr *UserListRepository) Get(userListID string) (*models.UserList, error) 
 	return &userList, nil
 }
 
-func (ulr *UserListRepository) Delete(userListID string) (*int, error) {
+func (ulr *UserListRepository) Delete(userListIDs *[]uint) (*int, error) {
 
-	if result := ulr.db.Delete(&models.UserList{}, userListID); result.Error != nil {
+	result := ulr.db.Delete(&models.UserList{}, userListIDs)
+
+	if result.Error != nil {
 		return nil, result.Error
 	}
 
-	deletedID, _ := strconv.Atoi(userListID)
+	rowsQtyDeleted := int(result.RowsAffected)
 
-	return &deletedID, nil
+	return &rowsQtyDeleted, nil
 
 }
 
