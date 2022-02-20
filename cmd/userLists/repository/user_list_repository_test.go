@@ -257,7 +257,7 @@ func TestUserListRepository_GetUserListsByUserID(t *testing.T) {
 	}
 	gormDb.Debug()
 
-	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `user_lists` WHERE `user_id` = ? AND `user_lists`.`deleted_at` IS NULL")).
+	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `user_lists` WHERE user_id = ? AND `user_lists`.`deleted_at` IS NULL")).
 		WillReturnRows(sqlmock.NewRows([]string{"id", "list_id"}).AddRow(1, 1).AddRow(2, 2))
 
 	userListRepo := NewUserListRepository(gormDb)
@@ -317,7 +317,7 @@ func TestUserListRepository_GetUserListsByListID(t *testing.T) {
 	}
 	gormDb.Debug()
 
-	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `user_lists` WHERE `list_id` = ? AND `user_lists`.`deleted_at` IS NULL")).
+	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `user_lists` WHERE list_id = ? AND `user_lists`.`deleted_at` IS NULL")).
 		WillReturnRows(sqlmock.NewRows([]string{"id", "list_id"}).AddRow(1, 1).AddRow(2, 2))
 
 	userListRepo := NewUserListRepository(gormDb)

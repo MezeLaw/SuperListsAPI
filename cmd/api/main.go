@@ -5,6 +5,9 @@ import (
 	"SuperListsAPI/cmd/auth/handler"
 	"SuperListsAPI/cmd/auth/repository"
 	"SuperListsAPI/cmd/auth/service"
+	listItemHandler "SuperListsAPI/cmd/listItems/handler"
+	listItemRepository "SuperListsAPI/cmd/listItems/repository"
+	listItemService "SuperListsAPI/cmd/listItems/service"
 	listHandler "SuperListsAPI/cmd/lists/handler"
 	listRepository "SuperListsAPI/cmd/lists/repository"
 	listService "SuperListsAPI/cmd/lists/service"
@@ -33,6 +36,10 @@ func main() {
 	listRepository := listRepository.NewListRepository(database.AppDatabase)
 	listService := listService.NewListService(&listRepository)
 	listsHandler := listHandler.NewListHandler(&listService, &userListService)
+
+	listItemRepository := listItemRepository.NewListItemRepository(database.AppDatabase)
+	listItemService := listItemService.NewListItemService(&listItemRepository)
+	listItemHandler := listItemHandler.NewListItemHandler(&listItemService)
 
 	router.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{
@@ -64,6 +71,14 @@ func main() {
 			userLists.GET("/:id", middleware.ValidateJWTOnRequest, userListHandler.Get)
 			userLists.GET("/", middleware.ValidateJWTOnRequest, userListHandler.GetUserListsByUserID)
 			userLists.DELETE("/:id", middleware.ValidateJWTOnRequest, userListHandler.Delete)
+		}
+
+		listItems := v1.Group("/listItems")
+		{
+			listItems.POST("/", listItemHandler.Create)
+			listItems.GET("/:id", listItemHandler.Get)
+			listItems.PUT("/:id", listItemHandler.Update)
+			listItems.DELETE("/:id", listItemHandler.Delete)
 		}
 
 	}

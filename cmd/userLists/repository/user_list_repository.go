@@ -47,7 +47,7 @@ func (ulr *UserListRepository) Delete(userListID string) (*int, error) {
 func (ulr *UserListRepository) GetUserListsByUserID(userId string) (*[]models.UserList, error) {
 
 	var userLists []models.UserList
-	if result := ulr.db.Where("user_id", userId).Find(&userLists); result.Error != nil {
+	if result := ulr.db.Where("user_id = ?", userId).Find(&userLists); result.Error != nil {
 		return nil, result.Error
 	}
 
@@ -56,7 +56,7 @@ func (ulr *UserListRepository) GetUserListsByUserID(userId string) (*[]models.Us
 
 func (ulr *UserListRepository) GetUserListsByListID(listID string) (*[]models.UserList, error) {
 	var userLists []models.UserList
-	if result := ulr.db.Where("list_id", listID).Find(&userLists); result.Error != nil {
+	if result := ulr.db.Where("list_id = ?", listID).Find(&userLists); result.Error != nil {
 		return nil, result.Error
 	}
 
