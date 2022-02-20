@@ -42,7 +42,6 @@ func (lir *ListItemRepository) Update(item models.ListItem) (*models.ListItem, e
 	}
 
 	return &item, nil
-
 }
 
 func (lir *ListItemRepository) Delete(listItemID string) (*int, error) {
@@ -70,9 +69,11 @@ func (lir *ListItemRepository) GetItemsListByListID(listId string) (*[]models.Li
 }
 
 func (lir *ListItemRepository) DeleteListItemsByListID(listId string) (*int, error) {
+	//TODO Probar esto funcionalmente
 
-	//result := lir.db.Delete(models.ListItem{}, "email LIKE ?", "%jinzhu%")
-	result := lir.db.Where("list_id = ? ", listId).Delete(models.ListItem{})
+	var listItem models.ListItem
+
+	result := lir.db.Where("list_id = ? ", &listId).Delete(&listItem)
 
 	if result.Error != nil {
 		return nil, result.Error
