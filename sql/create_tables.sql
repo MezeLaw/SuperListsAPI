@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS user_lists (
 ALTER TABLE user_lists ADD CONSTRAINT user_lists_list_id_fk FOREIGN KEY (list_id) REFERENCES lists(id) ON DELETE RESTRICT ON UPDATE RESTRICT;
 ALTER TABLE user_lists ADD CONSTRAINT user_lists_user_id_fk FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE RESTRICT ON UPDATE RESTRICT;
 
-CREATE TABLE list_item (
+CREATE TABLE list_items (
                               id serial PRIMARY KEY,
                               list_id bigint NOT NULL,
                               user_id bigint not null,

@@ -61,6 +61,8 @@ func TestUserListRepository_Create(t *testing.T) {
 	}
 	gormDb.Debug()
 
+	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `user_lists` WHERE list_id = ? AND user_id = ? AND deleted_at is null AND `user_lists`.`deleted_at` IS NULL")).
+		WillReturnRows(sqlmock.NewRows([]string{"id"}))
 	mock.ExpectBegin()
 	mock.ExpectExec(regexp.QuoteMeta("INSERT INTO `user_lists`" +
 		" (`created_at`,`updated_at`,`deleted_at`,`list_id`,`user_id`) VALUES (?,?,?,?,?)")).
@@ -73,6 +75,41 @@ func TestUserListRepository_Create(t *testing.T) {
 
 	assert.NotNil(t, result)
 	assert.NoError(t, err)
+}
+
+func TestUserListRepository_Create_Already_In_List(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+	}
+	defer db.Close()
+
+	gormDb, err := gorm.Open(mysql.New(mysql.Config{
+		Conn:                      db,
+		SkipInitializeWithVersion: true,
+	}), &gorm.Config{
+		Logger: logger.Default.LogMode(logger.Info),
+	})
+
+	if err != nil {
+		t.Error(err.Error())
+	}
+	gormDb.Debug()
+
+	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `user_lists` WHERE list_id = ? AND user_id = ? AND deleted_at is null AND `user_lists`.`deleted_at` IS NULL")).
+		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow("1"))
+	mock.ExpectBegin()
+	mock.ExpectExec(regexp.QuoteMeta("INSERT INTO `user_lists`" +
+		" (`created_at`,`updated_at`,`deleted_at`,`list_id`,`user_id`) VALUES (?,?,?,?,?)")).
+		WillReturnResult(sqlmock.NewResult(1, 1))
+	mock.ExpectCommit()
+
+	userListRepo := NewUserListRepository(gormDb)
+
+	result, err := userListRepo.Create(GetValidUserList())
+
+	assert.Nil(t, result)
+	assert.Error(t, err)
 }
 
 func TestUserListRepository_Create_Error(t *testing.T) {
@@ -93,12 +130,42 @@ func TestUserListRepository_Create_Error(t *testing.T) {
 		t.Error(err.Error())
 	}
 	gormDb.Debug()
-
+	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `user_lists` WHERE list_id = ? AND user_id = ? AND deleted_at is null AND `user_lists`.`deleted_at` IS NULL")).
+		WillReturnRows(sqlmock.NewRows([]string{"id"}))
 	mock.ExpectBegin()
 	mock.ExpectExec(regexp.QuoteMeta("INSERT INTO `user_lists`" +
 		" (`created_at`,`updated_at`,`deleted_at`,`list_id`,`user_id`) VALUES (?,?,?,?,?)")).
 		WillReturnError(errors.New("error from db"))
 	mock.ExpectCommit()
+
+	userListRepo := NewUserListRepository(gormDb)
+
+	result, err := userListRepo.Create(GetValidUserList())
+
+	assert.Nil(t, result)
+	assert.Error(t, err)
+}
+
+func TestUserListRepository_Create_Error_On_User_List_Query(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+	}
+	defer db.Close()
+
+	gormDb, err := gorm.Open(mysql.New(mysql.Config{
+		Conn:                      db,
+		SkipInitializeWithVersion: true,
+	}), &gorm.Config{
+		Logger: logger.Default.LogMode(logger.Info),
+	})
+
+	if err != nil {
+		t.Error(err.Error())
+	}
+	gormDb.Debug()
+	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `user_lists` WHERE list_id = ? AND user_id = ? AND deleted_at is null AND `user_lists`.`deleted_at` IS NULL")).
+		WillReturnError(errors.New("error from user list table"))
 
 	userListRepo := NewUserListRepository(gormDb)
 

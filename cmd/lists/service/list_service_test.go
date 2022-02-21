@@ -172,6 +172,31 @@ func TestListService_Delete_Error(t *testing.T) {
 	assert.Empty(t, result)
 }
 
+func TestListService_GetListByInvitationCode(t *testing.T) {
+
+	validList := GetValidList()
+
+	mockedRepo := NewMockIListRepository(gomock.NewController(t))
+	mockedRepo.EXPECT().GetListByInvitationCode(gomock.Any()).Return(&validList, nil)
+	listService := NewListService(mockedRepo)
+
+	result, err := listService.GetListByInvitationCode("1")
+
+	assert.NoError(t, err)
+	assert.NotEmpty(t, result)
+}
+
+func TestListService_GetListByInvitationCode_Error(t *testing.T) {
+	mockedRepo := NewMockIListRepository(gomock.NewController(t))
+	mockedRepo.EXPECT().GetListByInvitationCode(gomock.Any()).Return(nil, errors.New("error from list repository"))
+	listService := NewListService(mockedRepo)
+
+	result, err := listService.GetListByInvitationCode("1")
+
+	assert.Error(t, err)
+	assert.Empty(t, result)
+}
+
 func GetValidList() models.List {
 
 	inviteCode, _ := uuid.NewV4()

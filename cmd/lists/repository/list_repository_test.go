@@ -136,7 +136,9 @@ func TestListRepository_GetLists(t *testing.T) {
 	row := sqlmock.NewRows([]string{"id"}).
 		AddRow(1)
 
-	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `lists` WHERE (user_creator_id = ?) AND `lists`.`deleted_at` IS NULL")).
+	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `user_lists` WHERE user_id = ? AND `user_lists`.`deleted_at` IS NULL")).
+		WillReturnRows(row)
+	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `lists` WHERE `lists`.`id` = ? AND `lists`.`deleted_at` IS NULL")).
 		WillReturnRows(row)
 
 	listRepository := NewListRepository(gormDb)
@@ -145,6 +147,44 @@ func TestListRepository_GetLists(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.NotNil(t, result)
+}
+
+func TestListRepository_GetLists_List_Repo_Error(t *testing.T) {
+
+	//gormDb, mock := GetMockDB()
+
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+	}
+	defer db.Close()
+
+	gormDb, err := gorm.Open(mysql.New(mysql.Config{
+		Conn:                      db,
+		SkipInitializeWithVersion: true,
+	}), &gorm.Config{
+		Logger: logger.Default.LogMode(logger.Info),
+	})
+
+	if err != nil {
+		t.Error(err.Error())
+	}
+	gormDb.Debug()
+
+	row := sqlmock.NewRows([]string{"id"}).
+		AddRow(1)
+
+	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `user_lists` WHERE user_id = ? AND `user_lists`.`deleted_at` IS NULL")).
+		WillReturnRows(row)
+	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `lists` WHERE `lists`.`id` = ? AND `lists`.`deleted_at` IS NULL")).
+		WillReturnError(errors.New("error from list db"))
+
+	listRepository := NewListRepository(gormDb)
+
+	result, err := listRepository.GetLists("1")
+
+	assert.Error(t, err)
+	assert.Nil(t, result)
 }
 
 func TestListRepository_GetLists_Error(t *testing.T) {

@@ -62,7 +62,7 @@ func main() {
 			lists.GET("/", middleware.ValidateJWTOnRequest, listsHandler.GetLists)
 			lists.PUT("/:id", middleware.ValidateJWTOnRequest, listsHandler.Update)
 			lists.DELETE("/:id", middleware.ValidateJWTOnRequest, listsHandler.Delete)
-			lists.POST("/joinList/:listID", middleware.ValidateJWTOnRequest, listsHandler.JoinList)
+			lists.POST("/joinList/:listID/:inviteCode", middleware.ValidateJWTOnRequest, listsHandler.JoinList)
 		}
 
 		userLists := v1.Group("/userLists")

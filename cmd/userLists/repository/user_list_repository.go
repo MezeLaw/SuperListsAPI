@@ -2,6 +2,7 @@ package repository
 
 import (
 	"SuperListsAPI/cmd/userLists/models"
+	"errors"
 	"gorm.io/gorm"
 )
 
@@ -14,6 +15,20 @@ func NewUserListRepository(gormDB *gorm.DB) UserListRepository {
 }
 
 func (ulr *UserListRepository) Create(list models.UserList) (*models.UserList, error) {
+
+	var userLists []*models.UserList
+
+	result := ulr.db.Where("list_id = ?", list.ListID).
+		Where("user_id = ?", list.UserID).
+		Where("deleted_at is null").Find(&userLists)
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	if len(userLists) > 0 {
+		return nil, errors.New("You are already on this list!!")
+	}
 
 	if result := ulr.db.Create(&list); result.Error != nil {
 		return nil, result.Error

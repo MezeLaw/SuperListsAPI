@@ -20,6 +20,7 @@ type IListService interface {
 	Get(listId string) (*models.List, error)
 	Update(list models.List) (*models.List, error)
 	Delete(listID string) (*string, error)
+	GetListByInvitationCode(invitationCode string) (*models.List, error)
 }
 
 type IUserListService interface {
@@ -98,7 +99,7 @@ func (lh *ListHandler) Create(c *gin.Context) {
 
 func (lh *ListHandler) GetLists(c *gin.Context) {
 
-	userID := c.Request.Header.Get("USER_ID")
+	userID := c.Request.Header.Get("user_id")
 
 	if userID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -230,7 +231,7 @@ func (lh *ListHandler) Update(c *gin.Context) {
 
 func (lh *ListHandler) Delete(c *gin.Context) {
 	listID := c.Param("id")
-	userID := c.Request.Header.Get("USER_ID")
+	userID := c.Request.Header.Get("user_id")
 	var idsToDelete []uint
 
 	if userID == "" {
@@ -279,7 +280,6 @@ func (lh *ListHandler) Delete(c *gin.Context) {
 	}
 
 	//Borro los userLists correspondientes
-
 	deletedUserListsQty, err := lh.userListsService.Delete(&idsToDelete)
 
 	if err != nil {
@@ -294,9 +294,8 @@ func (lh *ListHandler) Delete(c *gin.Context) {
 	}
 
 	listItemsDeleted, err := lh.listItemsService.DeleteListItemsByListID(listID)
-	
+
 	if err != nil {
-		//TODO probar si 0 rows es error
 		c.JSON(http.StatusInternalServerError, err)
 		return
 	}
@@ -308,16 +307,8 @@ func (lh *ListHandler) Delete(c *gin.Context) {
 
 func (lh *ListHandler) JoinList(c *gin.Context) {
 
-	listID := c.Param("listID")
-	userID := c.Request.Header.Get("USER_ID")
-
-	if _, err := strconv.Atoi(listID); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"msg": "invalid list id",
-		})
-		c.Abort()
-		return
-	}
+	userID := c.Request.Header.Get("user_id")
+	inviteCode := c.Param("inviteCode")
 
 	if userID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -327,22 +318,36 @@ func (lh *ListHandler) JoinList(c *gin.Context) {
 		return
 	}
 
-	parsedListID, _ := strconv.Atoi(listID)
+	if inviteCode == "" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"msg": "missing user id on request header",
+		})
+		c.Abort()
+		return
+	}
+
 	parsedUserID, _ := strconv.Atoi(userID)
 
-	userList := userListsModel.UserList{
-		ListID: uint(parsedListID),
-		UserID: uint(parsedUserID),
-	}
-	ul, err := lh.userListsService.Create(userList)
+	recoveredList, err := lh.listService.GetListByInvitationCode(inviteCode)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err)
 		return
 	}
 
+	userList := userListsModel.UserList{
+		ListID: recoveredList.ID,
+		UserID: uint(parsedUserID),
+	}
+	ul, err := lh.userListsService.Create(userList)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, err.Error())
+		return
+	}
+
 	if ul == nil {
-		c.JSON(http.StatusNotFound, fmt.Sprintf("Couldnt join to list with id %s . UserList could not be created", listID))
+		c.JSON(http.StatusNotFound, fmt.Sprintf("Couldnt join to list with code %s . UserList could not be created", inviteCode))
 		return
 	}
 

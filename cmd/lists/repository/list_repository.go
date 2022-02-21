@@ -2,6 +2,8 @@ package repository
 
 import (
 	"SuperListsAPI/cmd/lists/models"
+	userListsModel "SuperListsAPI/cmd/userLists/models"
+	"github.com/gofrs/uuid"
 	"gorm.io/gorm"
 )
 
@@ -15,6 +17,10 @@ func NewListRepository(db *gorm.DB) ListRepository {
 
 func (lr *ListRepository) Create(list models.List) (*models.List, error) {
 
+	inviteCode, _ := uuid.NewV4()
+
+	list.InviteCode = inviteCode.String()
+
 	if result := lr.db.Create(&list); result.Error != nil {
 		return nil, result.Error
 	}
@@ -26,8 +32,19 @@ func (lr *ListRepository) Create(list models.List) (*models.List, error) {
 func (lr *ListRepository) GetLists(userId string) (*[]models.List, error) {
 
 	var lists []models.List
+	var userLists []userListsModel.UserList
+	listsIDs := []int{}
 	//TODO definir si desde el controller se debe hacer el cambio para appendear las userLists
-	if result := lr.db.Where("user_creator_id = ?", userId).Find(&lists); result.Error != nil {
+
+	if result := lr.db.Where("user_id = ?", userId).Find(&userLists); result.Error != nil {
+		return nil, result.Error
+	}
+
+	for _, userList := range userLists {
+		listsIDs = append(listsIDs, int(userList.ListID))
+	}
+
+	if result := lr.db.Find(&lists, listsIDs); result.Error != nil {
 		return nil, result.Error
 	}
 
@@ -61,4 +78,15 @@ func (lr *ListRepository) Delete(idToDelete string) (*string, error) {
 
 	return &idToDelete, nil
 
+}
+
+func (lr *ListRepository) GetListByInvitationCode(invitationCode string) (*models.List, error) {
+
+	var list models.List
+
+	if result := lr.db.Where("invite_code = ?", invitationCode).Find(&list); result.Error != nil {
+		return nil, result.Error
+	}
+
+	return &list, nil
 }

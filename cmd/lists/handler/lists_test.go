@@ -1256,9 +1256,11 @@ func GetValidListItem() listItemModels.ListItem {
 
 func TestListHandler_JoinList(t *testing.T) {
 
+	validList := GetValidList()
 	getValidUserList := GetValidUserList()
 
 	listService := NewMockIListService(gomock.NewController(t))
+	listService.EXPECT().GetListByInvitationCode(gomock.Any()).Return(&validList, nil)
 	userListService := NewMockIUserListService(gomock.NewController(t))
 
 	listItemService := NewMockIListItemService(gomock.NewController(t))
@@ -1272,11 +1274,11 @@ func TestListHandler_JoinList(t *testing.T) {
 
 	v1 := c.Group("/v1/lists/joinList")
 	{
-		v1.POST("/:listID", listHandler.JoinList)
+		v1.POST("/:listID/:inviteCode", listHandler.JoinList)
 	}
 
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodPost, "/v1/lists/joinList/1", nil)
+	req := httptest.NewRequest(http.MethodPost, "/v1/lists/joinList/1/validCode", nil)
 	req.Header.Add("USER_ID", "1")
 	c.ServeHTTP(w, req)
 
@@ -1286,12 +1288,15 @@ func TestListHandler_JoinList(t *testing.T) {
 
 func TestListHandler_JoinList_No_Cant_Join(t *testing.T) {
 
+	validList := GetValidList()
+
 	listService := NewMockIListService(gomock.NewController(t))
 	userListService := NewMockIUserListService(gomock.NewController(t))
 
 	listItemService := NewMockIListItemService(gomock.NewController(t))
 	listHandler := NewListHandler(listService, userListService, listItemService)
 
+	listService.EXPECT().GetListByInvitationCode(gomock.Any()).Return(&validList, nil)
 	userListService.EXPECT().Create(gomock.Any()).Return(nil, nil)
 
 	gin.SetMode(gin.TestMode)
@@ -1300,11 +1305,11 @@ func TestListHandler_JoinList_No_Cant_Join(t *testing.T) {
 
 	v1 := c.Group("/v1/lists/joinList")
 	{
-		v1.POST("/:listID", listHandler.JoinList)
+		v1.POST("/:listID/:inviteCode", listHandler.JoinList)
 	}
 
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodPost, "/v1/lists/joinList/1", nil)
+	req := httptest.NewRequest(http.MethodPost, "/v1/lists/joinList/1/validCode", nil)
 	req.Header.Add("USER_ID", "1")
 	c.ServeHTTP(w, req)
 
@@ -1313,15 +1318,40 @@ func TestListHandler_JoinList_No_Cant_Join(t *testing.T) {
 }
 
 func TestListHandler_JoinList_Error(t *testing.T) {
+	validList := GetValidList()
+	listService := NewMockIListService(gomock.NewController(t))
+	userListService := NewMockIUserListService(gomock.NewController(t))
+
+	listItemService := NewMockIListItemService(gomock.NewController(t))
+	listHandler := NewListHandler(listService, userListService, listItemService)
+	listService.EXPECT().GetListByInvitationCode(gomock.Any()).Return(&validList, nil)
+	userListService.EXPECT().Create(gomock.Any()).Return(nil, errors.New("error from userList service"))
+
+	gin.SetMode(gin.TestMode)
+
+	c := gin.Default()
+
+	v1 := c.Group("/v1/lists/joinList")
+	{
+		v1.POST("/:listID/:inviteCode", listHandler.JoinList)
+	}
+
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodPost, "/v1/lists/joinList/1/ValidCode", nil)
+	req.Header.Add("USER_ID", "1")
+	c.ServeHTTP(w, req)
+
+	assert.Equal(t, w.Code, http.StatusInternalServerError)
+
+}
+
+func TestListHandler_JoinList_Invalid_Invitation_Code(t *testing.T) {
 
 	listService := NewMockIListService(gomock.NewController(t))
 	userListService := NewMockIUserListService(gomock.NewController(t))
 
 	listItemService := NewMockIListItemService(gomock.NewController(t))
 	listHandler := NewListHandler(listService, userListService, listItemService)
-
-	userListService.EXPECT().Create(gomock.Any()).Return(nil, errors.New("error from userList service"))
-
 	gin.SetMode(gin.TestMode)
 
 	c := gin.Default()
@@ -1336,11 +1366,11 @@ func TestListHandler_JoinList_Error(t *testing.T) {
 	req.Header.Add("USER_ID", "1")
 	c.ServeHTTP(w, req)
 
-	assert.Equal(t, w.Code, http.StatusInternalServerError)
+	assert.Equal(t, w.Code, http.StatusBadRequest)
 
 }
 
-func TestListHandler_JoinList_Invalid_List_ID(t *testing.T) {
+func TestListHandler_JoinList_Error_When_Get_List_By_Invitation_Code(t *testing.T) {
 
 	listService := NewMockIListService(gomock.NewController(t))
 	userListService := NewMockIUserListService(gomock.NewController(t))
@@ -1348,21 +1378,22 @@ func TestListHandler_JoinList_Invalid_List_ID(t *testing.T) {
 	listItemService := NewMockIListItemService(gomock.NewController(t))
 	listHandler := NewListHandler(listService, userListService, listItemService)
 
+	listService.EXPECT().GetListByInvitationCode(gomock.Any()).Return(nil, errors.New("error when querying by invite code"))
 	gin.SetMode(gin.TestMode)
 
 	c := gin.Default()
 
 	v1 := c.Group("/v1/lists/joinList")
 	{
-		v1.POST("/:listID", listHandler.JoinList)
+		v1.POST("/:listID/:inviteCode", listHandler.JoinList)
 	}
 
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodPost, "/v1/lists/joinList/a", nil)
+	req := httptest.NewRequest(http.MethodPost, "/v1/lists/joinList/1/invalidCodeShouldnotPass", nil)
 	req.Header.Add("USER_ID", "1")
 	c.ServeHTTP(w, req)
 
-	assert.Equal(t, w.Code, http.StatusBadRequest)
+	assert.Equal(t, w.Code, http.StatusInternalServerError)
 
 }
 

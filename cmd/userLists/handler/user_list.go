@@ -118,7 +118,7 @@ func (ulh *UserListHandler) Delete(c *gin.Context) {
 }
 
 func (ulh *UserListHandler) GetUserListsByUserID(c *gin.Context) {
-	userID := c.Request.Header.Get("USER_ID")
+	userID := c.Request.Header.Get("user_id")
 
 	if userID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{
