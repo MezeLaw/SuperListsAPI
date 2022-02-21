@@ -66,7 +66,7 @@ func (authRepo *AuthRepository) Login(payload models.LoginPayload) (*string, err
 		ExpirationHours: EXPIRATION_HOURS,
 	}
 
-	token, err := jwtWrapper.GenerateToken(user.Email, user.Role)
+	token, err := jwtWrapper.GenerateToken(user.Email, user.Role, user.ID)
 
 	if err != nil {
 		return nil, err

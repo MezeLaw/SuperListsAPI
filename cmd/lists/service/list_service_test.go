@@ -148,13 +148,13 @@ func TestListService_Update_Error(t *testing.T) {
 
 func TestListService_Delete(t *testing.T) {
 
-	deletedIds := []uint{uint(1)}
+	deletedId := "1"
 
 	mockedRepo := NewMockIListRepository(gomock.NewController(t))
-	mockedRepo.EXPECT().Delete(gomock.Any()).Return(&deletedIds, nil)
+	mockedRepo.EXPECT().Delete(gomock.Any()).Return(&deletedId, nil)
 	listService := NewListService(mockedRepo)
 
-	result, err := listService.Delete([]uint{1})
+	result, err := listService.Delete("1")
 
 	assert.NoError(t, err)
 	assert.NotEmpty(t, result)
@@ -166,7 +166,32 @@ func TestListService_Delete_Error(t *testing.T) {
 	mockedRepo.EXPECT().Delete(gomock.Any()).Return(nil, errors.New("error from list repository"))
 	listService := NewListService(mockedRepo)
 
-	result, err := listService.Delete([]uint{1})
+	result, err := listService.Delete("1")
+
+	assert.Error(t, err)
+	assert.Empty(t, result)
+}
+
+func TestListService_GetListByInvitationCode(t *testing.T) {
+
+	validList := GetValidList()
+
+	mockedRepo := NewMockIListRepository(gomock.NewController(t))
+	mockedRepo.EXPECT().GetListByInvitationCode(gomock.Any()).Return(&validList, nil)
+	listService := NewListService(mockedRepo)
+
+	result, err := listService.GetListByInvitationCode("1")
+
+	assert.NoError(t, err)
+	assert.NotEmpty(t, result)
+}
+
+func TestListService_GetListByInvitationCode_Error(t *testing.T) {
+	mockedRepo := NewMockIListRepository(gomock.NewController(t))
+	mockedRepo.EXPECT().GetListByInvitationCode(gomock.Any()).Return(nil, errors.New("error from list repository"))
+	listService := NewListService(mockedRepo)
+
+	result, err := listService.GetListByInvitationCode("1")
 
 	assert.Error(t, err)
 	assert.Empty(t, result)

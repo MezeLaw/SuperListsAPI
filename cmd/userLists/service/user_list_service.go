@@ -7,7 +7,7 @@ import "SuperListsAPI/cmd/userLists/models"
 type IUserListRepository interface {
 	Create(list models.UserList) (*models.UserList, error)
 	Get(userListID string) (*models.UserList, error)
-	Delete(userListID string) (*int, error)
+	Delete(userListID *[]uint) (*int, error)
 	GetUserListsByUserID(userId string) (*[]models.UserList, error)
 	GetUserListsByListID(listID string) (*[]models.UserList, error)
 }
@@ -28,8 +28,8 @@ func (uls *UserListService) Get(userListID string) (*models.UserList, error) {
 	return uls.userListRepository.Get(userListID)
 }
 
-func (uls *UserListService) Delete(userListID string) (*int, error) {
-	return uls.userListRepository.Delete(userListID)
+func (uls *UserListService) Delete(userListIDs *[]uint) (*int, error) {
+	return uls.userListRepository.Delete(userListIDs)
 }
 
 func (uls *UserListService) GetUserListsByUserID(userId string) (*[]models.UserList, error) {

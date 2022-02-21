@@ -1,13 +1,17 @@
 package models
 
-import "gorm.io/gorm"
+import (
+	"SuperListsAPI/cmd/listItems/models"
+	"gorm.io/gorm"
+)
 
 type List struct {
 	gorm.Model
-	Name          string `json:"name" validate:"required"`
-	Description   string `json:"description" validate:"required"`
-	InviteCode    string `json:"invite_code" validate:"required"`
-	UserCreatorID uint   `json:"user_creator_id"`
+	Name          string            `json:"name" validate:"required"`
+	Description   string            `json:"description" validate:"required"`
+	InviteCode    string            `json:"invite_code"`
+	UserCreatorID uint              `json:"user_creator_id"`
+	ListItems     []models.ListItem `json:"list_items" gorm:"-"`
 }
 
 type ListJoinRequest struct {

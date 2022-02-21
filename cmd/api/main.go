@@ -33,13 +33,13 @@ func main() {
 	userListService := userListService.NewUserListService(&userListRepository)
 	userListHandler := userListHandler.NewUserListHandler(&userListService)
 
-	listRepository := listRepository.NewListRepository(database.AppDatabase)
-	listService := listService.NewListService(&listRepository)
-	listsHandler := listHandler.NewListHandler(&listService, &userListService)
-
 	listItemRepository := listItemRepository.NewListItemRepository(database.AppDatabase)
 	listItemService := listItemService.NewListItemService(&listItemRepository)
 	listItemHandler := listItemHandler.NewListItemHandler(&listItemService)
+
+	listRepository := listRepository.NewListRepository(database.AppDatabase)
+	listService := listService.NewListService(&listRepository)
+	listsHandler := listHandler.NewListHandler(&listService, &userListService, &listItemService)
 
 	router.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{
@@ -62,7 +62,7 @@ func main() {
 			lists.GET("/", middleware.ValidateJWTOnRequest, listsHandler.GetLists)
 			lists.PUT("/:id", middleware.ValidateJWTOnRequest, listsHandler.Update)
 			lists.DELETE("/:id", middleware.ValidateJWTOnRequest, listsHandler.Delete)
-			lists.POST("/joinList/:listID", middleware.ValidateJWTOnRequest, listsHandler.JoinList)
+			lists.POST("/joinList/:listID/:inviteCode", middleware.ValidateJWTOnRequest, listsHandler.JoinList)
 		}
 
 		userLists := v1.Group("/userLists")
@@ -75,13 +75,16 @@ func main() {
 
 		listItems := v1.Group("/listItems")
 		{
-			listItems.POST("/", listItemHandler.Create)
-			listItems.GET("/:id", listItemHandler.Get)
-			listItems.PUT("/:id", listItemHandler.Update)
-			listItems.DELETE("/:id", listItemHandler.Delete)
+			listItems.POST("/", middleware.ValidateJWTOnRequest, listItemHandler.Create)
+			listItems.GET("/:id", middleware.ValidateJWTOnRequest, listItemHandler.Get)
+			listItems.PUT("/:id", middleware.ValidateJWTOnRequest, listItemHandler.Update)
+			listItems.DELETE("/:id", middleware.ValidateJWTOnRequest, listItemHandler.Delete)
 		}
 
 	}
 
-	router.Run()
+	err := router.Run()
+	if err != nil {
+		panic("Error running sv!")
+	}
 }

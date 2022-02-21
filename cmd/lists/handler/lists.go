@@ -1,12 +1,13 @@
 package handler
 
 import (
+	listItemModels "SuperListsAPI/cmd/listItems/models"
 	"SuperListsAPI/cmd/lists/models"
-	userListsHandler "SuperListsAPI/cmd/userLists/handler"
 	userListsModel "SuperListsAPI/cmd/userLists/models"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"log"
 	"net/http"
 	"strconv"
 )
@@ -18,24 +19,35 @@ type IListService interface {
 	GetLists(userId string) (*[]models.List, error)
 	Get(listId string) (*models.List, error)
 	Update(list models.List) (*models.List, error)
-	Delete(idsToDelete []uint) (*[]uint, error)
+	Delete(listID string) (*string, error)
+	GetListByInvitationCode(invitationCode string) (*models.List, error)
 }
 
 type IUserListService interface {
 	Create(list userListsModel.UserList) (*userListsModel.UserList, error)
 	Get(userListID string) (*userListsModel.UserList, error)
-	Delete(userListID string) (*int, error)
+	Delete(userListID *[]uint) (*int, error)
 	GetUserListsByUserID(userId string) (*[]userListsModel.UserList, error)
 	GetUserListsByListID(listID string) (*[]userListsModel.UserList, error)
 }
 
-type ListHandler struct {
-	listService      IListService
-	userListsService userListsHandler.IUserListService
+type IListItemService interface {
+	Create(item listItemModels.ListItem) (*listItemModels.ListItem, error)
+	Get(listItemID string) (*listItemModels.ListItem, error)
+	Update(item listItemModels.ListItem) (*listItemModels.ListItem, error)
+	Delete(listItemID string) (*int, error)
+	GetItemsListByListID(listId string) (*[]listItemModels.ListItem, error)
+	DeleteListItemsByListID(listId string) (*int, error)
 }
 
-func NewListHandler(service IListService, userListService userListsHandler.IUserListService) ListHandler {
-	return ListHandler{listService: service, userListsService: userListService}
+type ListHandler struct {
+	listService      IListService
+	userListsService IUserListService
+	listItemsService IListItemService
+}
+
+func NewListHandler(service IListService, userListService IUserListService, listItemsService IListItemService) ListHandler {
+	return ListHandler{listService: service, userListsService: userListService, listItemsService: listItemsService}
 }
 
 func (lh *ListHandler) Create(c *gin.Context) {
@@ -87,7 +99,7 @@ func (lh *ListHandler) Create(c *gin.Context) {
 
 func (lh *ListHandler) GetLists(c *gin.Context) {
 
-	userID := c.Request.Header.Get("USER_ID")
+	userID := c.Request.Header.Get("user_id")
 
 	if userID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -144,6 +156,15 @@ func (lh *ListHandler) Get(c *gin.Context) {
 		c.JSON(http.StatusNotFound, fmt.Sprintf("List with id %s not found", listID))
 		return
 	}
+
+	listItems, err := lh.listItemsService.GetItemsListByListID(fmt.Sprint(list.ID))
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, err)
+		return
+	}
+
+	list.ListItems = *listItems
 
 	c.JSON(http.StatusOK, list)
 	return
@@ -210,7 +231,7 @@ func (lh *ListHandler) Update(c *gin.Context) {
 
 func (lh *ListHandler) Delete(c *gin.Context) {
 	listID := c.Param("id")
-	userID := c.Request.Header.Get("USER_ID")
+	userID := c.Request.Header.Get("user_id")
 	var idsToDelete []uint
 
 	if userID == "" {
@@ -247,35 +268,47 @@ func (lh *ListHandler) Delete(c *gin.Context) {
 	//TODO mejorar esto, pasar a la logica de servicio
 	//Si es el dueño, delete all the userLists sino a la unica que tiene
 	idsToDelete = UserListsToDelete(*userListsByListID, parsedUserID, list.UserCreatorID == uint(parsedUserID))
+	//Esto borra el list si sos el owner
+	if list.UserCreatorID == uint(parsedUserID) {
+		_, err := lh.listService.Delete(listID)
 
-	deletedIDs, err := lh.listService.Delete(idsToDelete)
+		if err != nil {
+			log.Print(fmt.Sprintf("Error deleting list with id: %s", listID))
+			c.JSON(http.StatusInternalServerError, err)
+			return
+		}
+	}
+
+	//Borro los userLists correspondientes
+	deletedUserListsQty, err := lh.userListsService.Delete(&idsToDelete)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err)
 		return
 	}
 
-	if deletedIDs == nil {
+	if deletedUserListsQty == nil {
 		c.JSON(http.StatusNotFound, fmt.Sprintf("List with id %s not found", listID))
+		log.Print(fmt.Sprintf("Error on userLists delete"))
 		return
 	}
 
-	c.JSON(http.StatusOK, deletedIDs)
+	listItemsDeleted, err := lh.listItemsService.DeleteListItemsByListID(listID)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, err)
+		return
+	}
+	log.Print(fmt.Sprintf("ListItems deleted qty: %d", *listItemsDeleted))
+
+	c.JSON(http.StatusOK, deletedUserListsQty)
 	return
 }
 
 func (lh *ListHandler) JoinList(c *gin.Context) {
 
-	listID := c.Param("listID")
-	userID := c.Request.Header.Get("USER_ID")
-
-	if _, err := strconv.Atoi(listID); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"msg": "invalid list id",
-		})
-		c.Abort()
-		return
-	}
+	userID := c.Request.Header.Get("user_id")
+	inviteCode := c.Param("inviteCode")
 
 	if userID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -285,22 +318,36 @@ func (lh *ListHandler) JoinList(c *gin.Context) {
 		return
 	}
 
-	parsedListID, _ := strconv.Atoi(listID)
+	if inviteCode == "" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"msg": "missing user id on request header",
+		})
+		c.Abort()
+		return
+	}
+
 	parsedUserID, _ := strconv.Atoi(userID)
 
-	userList := userListsModel.UserList{
-		ListID: uint(parsedListID),
-		UserID: uint(parsedUserID),
-	}
-	ul, err := lh.userListsService.Create(userList)
+	recoveredList, err := lh.listService.GetListByInvitationCode(inviteCode)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err)
 		return
 	}
 
+	userList := userListsModel.UserList{
+		ListID: recoveredList.ID,
+		UserID: uint(parsedUserID),
+	}
+	ul, err := lh.userListsService.Create(userList)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, err.Error())
+		return
+	}
+
 	if ul == nil {
-		c.JSON(http.StatusNotFound, fmt.Sprintf("Couldnt join to list with id %s . UserList could not be created", listID))
+		c.JSON(http.StatusNotFound, fmt.Sprintf("Couldnt join to list with code %s . UserList could not be created", inviteCode))
 		return
 	}
 

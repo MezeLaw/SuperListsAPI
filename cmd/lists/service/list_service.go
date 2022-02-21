@@ -11,7 +11,8 @@ type IListRepository interface {
 	GetLists(userId string) (*[]models.List, error)
 	Get(listId string) (*models.List, error)
 	Update(list models.List) (*models.List, error)
-	Delete(idsToDelete []uint) (*[]uint, error)
+	Delete(listID string) (*string, error)
+	GetListByInvitationCode(invitationCode string) (*models.List, error)
 }
 
 type ListService struct {
@@ -38,6 +39,10 @@ func (ls *ListService) Update(list models.List) (*models.List, error) {
 	return ls.listRepository.Update(list)
 }
 
-func (ls *ListService) Delete(idsToDelete []uint) (*[]uint, error) {
-	return ls.listRepository.Delete(idsToDelete)
+func (ls *ListService) Delete(listID string) (*string, error) {
+	return ls.listRepository.Delete(listID)
+}
+
+func (ls *ListService) GetListByInvitationCode(invitationCode string) (*models.List, error) {
+	return ls.listRepository.GetListByInvitationCode(invitationCode)
 }

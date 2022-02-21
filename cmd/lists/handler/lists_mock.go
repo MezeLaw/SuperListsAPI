@@ -5,8 +5,9 @@
 package handler
 
 import (
-	models "SuperListsAPI/cmd/lists/models"
-	models0 "SuperListsAPI/cmd/userLists/models"
+	models "SuperListsAPI/cmd/listItems/models"
+	models0 "SuperListsAPI/cmd/lists/models"
+	models1 "SuperListsAPI/cmd/userLists/models"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
@@ -36,10 +37,10 @@ func (m *MockIListService) EXPECT() *MockIListServiceMockRecorder {
 }
 
 // Create mocks base method.
-func (m *MockIListService) Create(list models.List) (*models.List, error) {
+func (m *MockIListService) Create(list models0.List) (*models0.List, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Create", list)
-	ret0, _ := ret[0].(*models.List)
+	ret0, _ := ret[0].(*models0.List)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -51,25 +52,25 @@ func (mr *MockIListServiceMockRecorder) Create(list interface{}) *gomock.Call {
 }
 
 // Delete mocks base method.
-func (m *MockIListService) Delete(idsToDelete []uint) (*[]uint, error) {
+func (m *MockIListService) Delete(listID string) (*string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Delete", idsToDelete)
-	ret0, _ := ret[0].(*[]uint)
+	ret := m.ctrl.Call(m, "Delete", listID)
+	ret0, _ := ret[0].(*string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Delete indicates an expected call of Delete.
-func (mr *MockIListServiceMockRecorder) Delete(idsToDelete interface{}) *gomock.Call {
+func (mr *MockIListServiceMockRecorder) Delete(listID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockIListService)(nil).Delete), idsToDelete)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockIListService)(nil).Delete), listID)
 }
 
 // Get mocks base method.
-func (m *MockIListService) Get(listId string) (*models.List, error) {
+func (m *MockIListService) Get(listId string) (*models0.List, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Get", listId)
-	ret0, _ := ret[0].(*models.List)
+	ret0, _ := ret[0].(*models0.List)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -80,11 +81,26 @@ func (mr *MockIListServiceMockRecorder) Get(listId interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockIListService)(nil).Get), listId)
 }
 
+// GetListByInvitationCode mocks base method.
+func (m *MockIListService) GetListByInvitationCode(invitationCode string) (*models0.List, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetListByInvitationCode", invitationCode)
+	ret0, _ := ret[0].(*models0.List)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetListByInvitationCode indicates an expected call of GetListByInvitationCode.
+func (mr *MockIListServiceMockRecorder) GetListByInvitationCode(invitationCode interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetListByInvitationCode", reflect.TypeOf((*MockIListService)(nil).GetListByInvitationCode), invitationCode)
+}
+
 // GetLists mocks base method.
-func (m *MockIListService) GetLists(userId string) (*[]models.List, error) {
+func (m *MockIListService) GetLists(userId string) (*[]models0.List, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetLists", userId)
-	ret0, _ := ret[0].(*[]models.List)
+	ret0, _ := ret[0].(*[]models0.List)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -96,10 +112,10 @@ func (mr *MockIListServiceMockRecorder) GetLists(userId interface{}) *gomock.Cal
 }
 
 // Update mocks base method.
-func (m *MockIListService) Update(list models.List) (*models.List, error) {
+func (m *MockIListService) Update(list models0.List) (*models0.List, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Update", list)
-	ret0, _ := ret[0].(*models.List)
+	ret0, _ := ret[0].(*models0.List)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -134,10 +150,10 @@ func (m *MockIUserListService) EXPECT() *MockIUserListServiceMockRecorder {
 }
 
 // Create mocks base method.
-func (m *MockIUserListService) Create(list models0.UserList) (*models0.UserList, error) {
+func (m *MockIUserListService) Create(list models1.UserList) (*models1.UserList, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Create", list)
-	ret0, _ := ret[0].(*models0.UserList)
+	ret0, _ := ret[0].(*models1.UserList)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -149,7 +165,7 @@ func (mr *MockIUserListServiceMockRecorder) Create(list interface{}) *gomock.Cal
 }
 
 // Delete mocks base method.
-func (m *MockIUserListService) Delete(userListID string) (*int, error) {
+func (m *MockIUserListService) Delete(userListID *[]uint) (*int, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Delete", userListID)
 	ret0, _ := ret[0].(*int)
@@ -164,10 +180,10 @@ func (mr *MockIUserListServiceMockRecorder) Delete(userListID interface{}) *gomo
 }
 
 // Get mocks base method.
-func (m *MockIUserListService) Get(userListID string) (*models0.UserList, error) {
+func (m *MockIUserListService) Get(userListID string) (*models1.UserList, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Get", userListID)
-	ret0, _ := ret[0].(*models0.UserList)
+	ret0, _ := ret[0].(*models1.UserList)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -179,10 +195,10 @@ func (mr *MockIUserListServiceMockRecorder) Get(userListID interface{}) *gomock.
 }
 
 // GetUserListsByListID mocks base method.
-func (m *MockIUserListService) GetUserListsByListID(listID string) (*[]models0.UserList, error) {
+func (m *MockIUserListService) GetUserListsByListID(listID string) (*[]models1.UserList, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetUserListsByListID", listID)
-	ret0, _ := ret[0].(*[]models0.UserList)
+	ret0, _ := ret[0].(*[]models1.UserList)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -194,10 +210,10 @@ func (mr *MockIUserListServiceMockRecorder) GetUserListsByListID(listID interfac
 }
 
 // GetUserListsByUserID mocks base method.
-func (m *MockIUserListService) GetUserListsByUserID(userId string) (*[]models0.UserList, error) {
+func (m *MockIUserListService) GetUserListsByUserID(userId string) (*[]models1.UserList, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetUserListsByUserID", userId)
-	ret0, _ := ret[0].(*[]models0.UserList)
+	ret0, _ := ret[0].(*[]models1.UserList)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -206,4 +222,117 @@ func (m *MockIUserListService) GetUserListsByUserID(userId string) (*[]models0.U
 func (mr *MockIUserListServiceMockRecorder) GetUserListsByUserID(userId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserListsByUserID", reflect.TypeOf((*MockIUserListService)(nil).GetUserListsByUserID), userId)
+}
+
+// MockIListItemService is a mock of IListItemService interface.
+type MockIListItemService struct {
+	ctrl     *gomock.Controller
+	recorder *MockIListItemServiceMockRecorder
+}
+
+// MockIListItemServiceMockRecorder is the mock recorder for MockIListItemService.
+type MockIListItemServiceMockRecorder struct {
+	mock *MockIListItemService
+}
+
+// NewMockIListItemService creates a new mock instance.
+func NewMockIListItemService(ctrl *gomock.Controller) *MockIListItemService {
+	mock := &MockIListItemService{ctrl: ctrl}
+	mock.recorder = &MockIListItemServiceMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockIListItemService) EXPECT() *MockIListItemServiceMockRecorder {
+	return m.recorder
+}
+
+// Create mocks base method.
+func (m *MockIListItemService) Create(item models.ListItem) (*models.ListItem, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Create", item)
+	ret0, _ := ret[0].(*models.ListItem)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Create indicates an expected call of Create.
+func (mr *MockIListItemServiceMockRecorder) Create(item interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockIListItemService)(nil).Create), item)
+}
+
+// Delete mocks base method.
+func (m *MockIListItemService) Delete(listItemID string) (*int, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Delete", listItemID)
+	ret0, _ := ret[0].(*int)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Delete indicates an expected call of Delete.
+func (mr *MockIListItemServiceMockRecorder) Delete(listItemID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockIListItemService)(nil).Delete), listItemID)
+}
+
+// DeleteListItemsByListID mocks base method.
+func (m *MockIListItemService) DeleteListItemsByListID(listId string) (*int, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteListItemsByListID", listId)
+	ret0, _ := ret[0].(*int)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DeleteListItemsByListID indicates an expected call of DeleteListItemsByListID.
+func (mr *MockIListItemServiceMockRecorder) DeleteListItemsByListID(listId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteListItemsByListID", reflect.TypeOf((*MockIListItemService)(nil).DeleteListItemsByListID), listId)
+}
+
+// Get mocks base method.
+func (m *MockIListItemService) Get(listItemID string) (*models.ListItem, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Get", listItemID)
+	ret0, _ := ret[0].(*models.ListItem)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Get indicates an expected call of Get.
+func (mr *MockIListItemServiceMockRecorder) Get(listItemID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockIListItemService)(nil).Get), listItemID)
+}
+
+// GetItemsListByListID mocks base method.
+func (m *MockIListItemService) GetItemsListByListID(listId string) (*[]models.ListItem, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetItemsListByListID", listId)
+	ret0, _ := ret[0].(*[]models.ListItem)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetItemsListByListID indicates an expected call of GetItemsListByListID.
+func (mr *MockIListItemServiceMockRecorder) GetItemsListByListID(listId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetItemsListByListID", reflect.TypeOf((*MockIListItemService)(nil).GetItemsListByListID), listId)
+}
+
+// Update mocks base method.
+func (m *MockIListItemService) Update(item models.ListItem) (*models.ListItem, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Update", item)
+	ret0, _ := ret[0].(*models.ListItem)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Update indicates an expected call of Update.
+func (mr *MockIListItemServiceMockRecorder) Update(item interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockIListItemService)(nil).Update), item)
 }
