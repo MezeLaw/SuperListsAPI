@@ -422,6 +422,66 @@ func TestListRepository_Delete_Error(t *testing.T) {
 	assert.Nil(t, result)
 }
 
+func TestListRepository_GetListByInvitationCode(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+	}
+	defer db.Close()
+
+	gormDb, err := gorm.Open(mysql.New(mysql.Config{
+		Conn:                      db,
+		SkipInitializeWithVersion: true,
+	}), &gorm.Config{
+		Logger: logger.Default.LogMode(logger.Info),
+	})
+
+	if err != nil {
+		t.Error(err.Error())
+	}
+	gormDb.Debug()
+
+	mock.ExpectQuery(regexp.QuoteMeta("SELECT")).WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow("1"))
+
+	listRepository := NewListRepository(gormDb)
+
+	result, err := listRepository.GetListByInvitationCode("mockCode")
+
+	assert.NotNil(t, result)
+	assert.NoError(t, err)
+
+}
+
+func TestListRepository_GetListByInvitationCode_Error(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+	}
+	defer db.Close()
+
+	gormDb, err := gorm.Open(mysql.New(mysql.Config{
+		Conn:                      db,
+		SkipInitializeWithVersion: true,
+	}), &gorm.Config{
+		Logger: logger.Default.LogMode(logger.Info),
+	})
+
+	if err != nil {
+		t.Error(err.Error())
+	}
+	gormDb.Debug()
+
+	mock.ExpectQuery(regexp.QuoteMeta("SELECT")).WillReturnError(errors.New("error from list repository"))
+
+	listRepository := NewListRepository(gormDb)
+
+	result, err := listRepository.GetListByInvitationCode("mockCode")
+
+	assert.Nil(t, result)
+	assert.Error(t, err)
+
+}
+
 func GetValidList() models.List {
 	return models.List{
 		Model:         gorm.Model{},

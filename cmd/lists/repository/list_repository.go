@@ -34,7 +34,6 @@ func (lr *ListRepository) GetLists(userId string) (*[]models.List, error) {
 	var lists []models.List
 	var userLists []userListsModel.UserList
 	listsIDs := []int{}
-	//TODO definir si desde el controller se debe hacer el cambio para appendear las userLists
 
 	if result := lr.db.Where("user_id = ?", userId).Find(&userLists); result.Error != nil {
 		return nil, result.Error
