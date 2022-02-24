@@ -27,6 +27,7 @@ func NewAuthHandler(authService IAuthService) AuthHandler {
 //var validate *validator.Validate
 
 func (authHandler *AuthHandler) Login(c *gin.Context) {
+
 	var payload models.LoginPayload
 
 	validate := validator.New()
@@ -65,7 +66,12 @@ func (authHandler *AuthHandler) Login(c *gin.Context) {
 		}
 	}
 	c.Header("token", *token)
-	c.JSON(http.StatusOK, token)
+
+	response := map[string]interface{}{
+		"token": token,
+	}
+
+	c.JSON(http.StatusOK, response)
 	return
 }
 

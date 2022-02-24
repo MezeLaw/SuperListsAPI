@@ -15,7 +15,9 @@ import (
 	userListRepository "SuperListsAPI/cmd/userLists/repository"
 	userListService "SuperListsAPI/cmd/userLists/service"
 	"SuperListsAPI/internal/database"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"time"
 )
 
 func main() {
@@ -23,6 +25,19 @@ func main() {
 	database.InitDatabase()
 
 	router := gin.Default()
+	//router.SetTrustedProxies([]string{"127.0.0.1"})
+
+	router.Use(cors.New(cors.Config{
+		AllowOrigins: []string{"*"},
+		//AllowMethods: []string{"POST", "GET", "DELETE", "PUT", "PATCH", "OPTIONS"},
+		AllowHeaders: []string{"Origin", "Content-Type"},
+		//ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		//AllowOriginFunc: func(origin string) bool {
+		//	return origin == "https://github.com"
+		//},
+		MaxAge: 12 * time.Hour,
+	}))
 	gin.ForceConsoleColor()
 
 	authRepository := repository.NewAuthRepository(database.AppDatabase)
@@ -50,8 +65,8 @@ func main() {
 	v1 := router.Group("/v1")
 	{
 		auth := v1.Group("/auth")
-		{
-			auth.GET("/login", authHandler.Login)
+		{ //TODO cambiar los tests de login por POST
+			auth.POST("/login", authHandler.Login)
 			auth.POST("/signup", authHandler.SignUp)
 		}
 
