@@ -14,6 +14,9 @@ import (
 	userListHandler "SuperListsAPI/cmd/userLists/handler"
 	userListRepository "SuperListsAPI/cmd/userLists/repository"
 	userListService "SuperListsAPI/cmd/userLists/service"
+	userHandler "SuperListsAPI/cmd/users/handler"
+	userRepository "SuperListsAPI/cmd/users/repository"
+	userService "SuperListsAPI/cmd/users/service"
 	"SuperListsAPI/internal/database"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -44,6 +47,10 @@ func main() {
 	authService := service.NewAuthService(&authRepository)
 	authHandler := handler.NewAuthHandler(&authService)
 
+	userRepository := userRepository.NewUsersRepository(database.AppDatabase)
+	userService := userService.NewUserService(&userRepository)
+	userHandler := userHandler.NewUserHandler(&userService)
+
 	userListRepository := userListRepository.NewUserListRepository(database.AppDatabase)
 	userListService := userListService.NewUserListService(&userListRepository)
 	userListHandler := userListHandler.NewUserListHandler(&userListService)
@@ -68,6 +75,11 @@ func main() {
 		{ //TODO cambiar los tests de login por POST
 			auth.POST("/login", authHandler.Login)
 			auth.POST("/signup", authHandler.SignUp)
+		}
+
+		users := v1.Group("/users")
+		{
+			users.GET("/:email", middleware.ValidateJWTOnRequest, userHandler.Get)
 		}
 
 		lists := v1.Group("/lists")
