@@ -5,6 +5,7 @@ import (
 	userListsModel "SuperListsAPI/cmd/userLists/models"
 	"github.com/gofrs/uuid"
 	"gorm.io/gorm"
+	"log"
 )
 
 type ListRepository struct {
@@ -37,6 +38,11 @@ func (lr *ListRepository) GetLists(userId string) (*[]models.List, error) {
 
 	if result := lr.db.Where("user_id = ?", userId).Find(&userLists); result.Error != nil {
 		return nil, result.Error
+	}
+	//TODO Add tests for this if statement
+	if len(userLists) < 1 {
+		log.Print("No user-lists for user with ID: ", userId)
+		return &[]models.List{}, nil
 	}
 
 	for _, userList := range userLists {
