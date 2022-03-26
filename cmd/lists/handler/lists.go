@@ -4,6 +4,7 @@ import (
 	listItemModels "SuperListsAPI/cmd/listItems/models"
 	"SuperListsAPI/cmd/lists/models"
 	userListsModel "SuperListsAPI/cmd/userLists/models"
+	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
@@ -329,6 +330,11 @@ func (lh *ListHandler) JoinList(c *gin.Context) {
 	parsedUserID, _ := strconv.Atoi(userID)
 
 	recoveredList, err := lh.listService.GetListByInvitationCode(inviteCode)
+	//TODO agregar estos tests
+	if recoveredList.ID == 0 {
+		c.JSON(http.StatusNotFound, errors.New("list for this code cannot be found"))
+		return
+	}
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err)

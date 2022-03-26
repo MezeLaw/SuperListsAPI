@@ -10,6 +10,7 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
+	"gorm.io/gorm"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -1232,6 +1233,7 @@ func TestListHandler_Delete_Returns_Error_On_User_Lists_Delete(t *testing.T) {
 
 func GetValidList() models.List {
 	return models.List{
+		Model:       gorm.Model{ID: 1},
 		Name:        "Mocked list name",
 		Description: "Mocked list description",
 	}
@@ -1254,6 +1256,7 @@ func GetValidListItem() listItemModels.ListItem {
 	}
 }
 
+//TODO eliminar del path el listID para los tests de joinList
 func TestListHandler_JoinList(t *testing.T) {
 
 	validList := GetValidList()
@@ -1274,11 +1277,11 @@ func TestListHandler_JoinList(t *testing.T) {
 
 	v1 := c.Group("/v1/lists/joinList")
 	{
-		v1.POST("/:listID/:inviteCode", listHandler.JoinList)
+		v1.POST("/:inviteCode", listHandler.JoinList)
 	}
 
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodPost, "/v1/lists/joinList/1/validCode", nil)
+	req := httptest.NewRequest(http.MethodPost, "/v1/lists/joinList/validCode", nil)
 	req.Header.Add("USER_ID", "1")
 	c.ServeHTTP(w, req)
 
@@ -1333,11 +1336,11 @@ func TestListHandler_JoinList_Error(t *testing.T) {
 
 	v1 := c.Group("/v1/lists/joinList")
 	{
-		v1.POST("/:listID/:inviteCode", listHandler.JoinList)
+		v1.POST("/:inviteCode", listHandler.JoinList)
 	}
 
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodPost, "/v1/lists/joinList/1/ValidCode", nil)
+	req := httptest.NewRequest(http.MethodPost, "/v1/lists/joinList/ValidCode", nil)
 	req.Header.Add("USER_ID", "1")
 	c.ServeHTTP(w, req)
 

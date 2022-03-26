@@ -32,8 +32,8 @@ func main() {
 
 	router.Use(cors.New(cors.Config{
 		AllowOrigins: []string{"*"},
-		//AllowMethods: []string{"POST", "GET", "DELETE", "PUT", "PATCH", "OPTIONS"},
-		AllowHeaders: []string{"Origin", "Content-Type"},
+		AllowMethods: []string{"POST", "GET", "DELETE", "PUT", "PATCH", "OPTIONS"},
+		AllowHeaders: []string{"*", "*"},
 		//ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
 		//AllowOriginFunc: func(origin string) bool {
@@ -89,7 +89,7 @@ func main() {
 			lists.GET("/", middleware.ValidateJWTOnRequest, listsHandler.GetLists)
 			lists.PUT("/:id", middleware.ValidateJWTOnRequest, listsHandler.Update)
 			lists.DELETE("/:id", middleware.ValidateJWTOnRequest, listsHandler.Delete)
-			lists.POST("/joinList/:listID/:inviteCode", middleware.ValidateJWTOnRequest, listsHandler.JoinList)
+			lists.POST("/joinList/:inviteCode", middleware.ValidateJWTOnRequest, listsHandler.JoinList)
 		}
 
 		userLists := v1.Group("/userLists")
