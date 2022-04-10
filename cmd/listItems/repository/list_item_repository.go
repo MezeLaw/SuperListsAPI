@@ -83,3 +83,32 @@ func (lir *ListItemRepository) DeleteListItemsByListID(listId string) (*int, err
 
 	return &rowsDeleted, nil
 }
+
+func (lir *ListItemRepository) BulkDelete(tasksToDelete []models.ListItem) (*int, error) {
+
+	//db.Delete(&users, []int{1,2,3})
+	//// DELETE FROM users WHERE id IN (1,2,3);
+	idsToDelete := extractIdsFromTasksToDelete(tasksToDelete)
+
+	result := lir.db.Delete(&models.ListItem{}, idsToDelete)
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	rowsDeleted := int(result.RowsAffected)
+
+	return &rowsDeleted, nil
+
+}
+
+func extractIdsFromTasksToDelete(tasksToDelete []models.ListItem) *[]uint {
+
+	var idsToDelete []uint
+
+	for _, task := range tasksToDelete {
+		idsToDelete = append(idsToDelete, task.ID)
+	}
+
+	return &idsToDelete
+}

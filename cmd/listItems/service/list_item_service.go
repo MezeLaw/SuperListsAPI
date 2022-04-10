@@ -11,6 +11,7 @@ type IListItemRepository interface {
 	Delete(listItemID string) (*int, error)
 	GetItemsListByListID(listId string) (*[]models.ListItem, error)
 	DeleteListItemsByListID(listId string) (*int, error)
+	BulkDelete(tasksToDelete []models.ListItem) (*int, error)
 }
 
 type ListItemService struct {
@@ -79,6 +80,17 @@ func (lis *ListItemService) GetItemsListByListID(listId string) (*[]models.ListI
 func (lis *ListItemService) DeleteListItemsByListID(listId string) (*int, error) {
 
 	result, err := lis.repository.DeleteListItemsByListID(listId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+func (lis *ListItemService) BulkDelete(tasksToDelete []models.ListItem) (*int, error) {
+
+	result, err := lis.repository.BulkDelete(tasksToDelete)
 
 	if err != nil {
 		return nil, err
