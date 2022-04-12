@@ -107,6 +107,8 @@ func main() {
 			listItems.PUT("/:id", middleware.ValidateJWTOnRequest, listItemHandler.Update)
 			listItems.DELETE("/:id", middleware.ValidateJWTOnRequest, listItemHandler.Delete)
 			listItems.POST("/bulkDelete", middleware.ValidateJWTOnRequest, listItemHandler.BulkDelete)
+			listItems.POST("/markAsCompleted", middleware.ValidateJWTOnRequest, listItemHandler.MarkAsCompleted)
+			listItems.POST("/markAsPending", middleware.ValidateJWTOnRequest, listItemHandler.MarkAsPending)
 		}
 
 	}

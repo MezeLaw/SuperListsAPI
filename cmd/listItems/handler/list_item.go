@@ -19,6 +19,8 @@ type IListItemService interface {
 	GetItemsListByListID(listId string) (*[]models.ListItem, error)
 	DeleteListItemsByListID(listId string) (*int, error)
 	BulkDelete(tasksToDelete []models.ListItem) (*int, error)
+	MarkAsCompleted(tasksToDelete []models.ListItem) (*int, error)
+	MarkAsPending(tasksToDelete []models.ListItem) (*int, error)
 }
 
 type ListItemHandler struct {
@@ -194,4 +196,66 @@ func (lih *ListItemHandler) BulkDelete(c *gin.Context) {
 	c.JSON(http.StatusOK, result)
 	return
 
+}
+
+func (lih *ListItemHandler) MarkAsCompleted(c *gin.Context) {
+	var listItemsToUpdate []models.ListItem
+
+	err := c.ShouldBindJSON(&listItemsToUpdate)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"msg": "invalid json",
+		})
+		c.Abort()
+		return
+	}
+
+	if len(listItemsToUpdate) < 1 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"msg": "no tasks received for delete",
+		})
+		c.Abort()
+		return
+	}
+
+	result, err := lih.listItemService.MarkAsCompleted(listItemsToUpdate)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, result)
+	return
+}
+
+func (lih *ListItemHandler) MarkAsPending(c *gin.Context) {
+	var listItemsToUpdate []models.ListItem
+
+	err := c.ShouldBindJSON(&listItemsToUpdate)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"msg": "invalid json",
+		})
+		c.Abort()
+		return
+	}
+
+	if len(listItemsToUpdate) < 1 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"msg": "no tasks received for delete",
+		})
+		c.Abort()
+		return
+	}
+
+	result, err := lih.listItemService.MarkAsPending(listItemsToUpdate)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, result)
+	return
 }
