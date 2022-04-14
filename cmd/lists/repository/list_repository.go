@@ -95,3 +95,29 @@ func (lr *ListRepository) GetListByInvitationCode(invitationCode string) (*model
 
 	return &list, nil
 }
+
+func (lr *ListRepository) BulkDelete(listsToDelete []models.List) (*int, error) {
+
+	idsToDelete := extractIdsFromListsToDelete(listsToDelete)
+
+	result := lr.db.Delete(&models.List{}, idsToDelete)
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	rowsDeleted := int(result.RowsAffected)
+
+	return &rowsDeleted, nil
+}
+
+func extractIdsFromListsToDelete(listsToDelete []models.List) *[]uint {
+
+	var idsToDelete []uint
+
+	for _, list := range listsToDelete {
+		idsToDelete = append(idsToDelete, list.ID)
+	}
+
+	return &idsToDelete
+}

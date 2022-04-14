@@ -22,6 +22,7 @@ type IListService interface {
 	Update(list models.List) (*models.List, error)
 	Delete(listID string) (*string, error)
 	GetListByInvitationCode(invitationCode string) (*models.List, error)
+	BulkDelete(listsToDelete []models.List) (*int, error)
 }
 
 type IUserListService interface {
@@ -358,6 +359,37 @@ func (lh *ListHandler) JoinList(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, ul)
+	return
+}
+
+func (lh *ListHandler) BulkDelete(c *gin.Context) {
+	var listToDelete []models.List
+
+	err := c.ShouldBindJSON(&listToDelete)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"msg": "invalid json",
+		})
+		c.Abort()
+		return
+	}
+
+	if len(listToDelete) < 1 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"msg": "no lists received",
+		})
+		c.Abort()
+		return
+	}
+
+	result, err := lh.listService.BulkDelete(listToDelete)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, result)
 	return
 }
 
