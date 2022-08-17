@@ -90,6 +90,7 @@ func main() {
 			lists.PUT("/:id", middleware.ValidateJWTOnRequest, listsHandler.Update)
 			lists.DELETE("/:id", middleware.ValidateJWTOnRequest, listsHandler.Delete)
 			lists.POST("/joinList/:inviteCode", middleware.ValidateJWTOnRequest, listsHandler.JoinList)
+			lists.POST("/bulkDelete", middleware.ValidateJWTOnRequest, listsHandler.BulkDelete)
 		}
 
 		userLists := v1.Group("/userLists")
@@ -106,6 +107,9 @@ func main() {
 			listItems.GET("/:id", middleware.ValidateJWTOnRequest, listItemHandler.Get)
 			listItems.PUT("/:id", middleware.ValidateJWTOnRequest, listItemHandler.Update)
 			listItems.DELETE("/:id", middleware.ValidateJWTOnRequest, listItemHandler.Delete)
+			listItems.POST("/bulkDelete", middleware.ValidateJWTOnRequest, listItemHandler.BulkDelete)
+			listItems.POST("/markAsCompleted", middleware.ValidateJWTOnRequest, listItemHandler.MarkAsCompleted)
+			listItems.POST("/markAsPending", middleware.ValidateJWTOnRequest, listItemHandler.MarkAsPending)
 		}
 
 	}

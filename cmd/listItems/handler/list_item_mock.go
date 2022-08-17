@@ -34,6 +34,21 @@ func (m *MockIListItemService) EXPECT() *MockIListItemServiceMockRecorder {
 	return m.recorder
 }
 
+// BulkDelete mocks base method.
+func (m *MockIListItemService) BulkDelete(tasksToDelete []models.ListItem) (*int, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "BulkDelete", tasksToDelete)
+	ret0, _ := ret[0].(*int)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// BulkDelete indicates an expected call of BulkDelete.
+func (mr *MockIListItemServiceMockRecorder) BulkDelete(tasksToDelete interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BulkDelete", reflect.TypeOf((*MockIListItemService)(nil).BulkDelete), tasksToDelete)
+}
+
 // Create mocks base method.
 func (m *MockIListItemService) Create(item models.ListItem) (*models.ListItem, error) {
 	m.ctrl.T.Helper()
@@ -107,6 +122,36 @@ func (m *MockIListItemService) GetItemsListByListID(listId string) (*[]models.Li
 func (mr *MockIListItemServiceMockRecorder) GetItemsListByListID(listId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetItemsListByListID", reflect.TypeOf((*MockIListItemService)(nil).GetItemsListByListID), listId)
+}
+
+// MarkAsCompleted mocks base method.
+func (m *MockIListItemService) MarkAsCompleted(tasksToDelete []models.ListItem) (*int, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "MarkAsCompleted", tasksToDelete)
+	ret0, _ := ret[0].(*int)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// MarkAsCompleted indicates an expected call of MarkAsCompleted.
+func (mr *MockIListItemServiceMockRecorder) MarkAsCompleted(tasksToDelete interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "MarkAsCompleted", reflect.TypeOf((*MockIListItemService)(nil).MarkAsCompleted), tasksToDelete)
+}
+
+// MarkAsPending mocks base method.
+func (m *MockIListItemService) MarkAsPending(tasksToDelete []models.ListItem) (*int, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "MarkAsPending", tasksToDelete)
+	ret0, _ := ret[0].(*int)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// MarkAsPending indicates an expected call of MarkAsPending.
+func (mr *MockIListItemServiceMockRecorder) MarkAsPending(tasksToDelete interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "MarkAsPending", reflect.TypeOf((*MockIListItemService)(nil).MarkAsPending), tasksToDelete)
 }
 
 // Update mocks base method.

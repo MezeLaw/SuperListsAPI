@@ -34,6 +34,21 @@ func (m *MockIListRepository) EXPECT() *MockIListRepositoryMockRecorder {
 	return m.recorder
 }
 
+// BulkDelete mocks base method.
+func (m *MockIListRepository) BulkDelete(listsToDelete []models.List) (*int, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "BulkDelete", listsToDelete)
+	ret0, _ := ret[0].(*int)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// BulkDelete indicates an expected call of BulkDelete.
+func (mr *MockIListRepositoryMockRecorder) BulkDelete(listsToDelete interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BulkDelete", reflect.TypeOf((*MockIListRepository)(nil).BulkDelete), listsToDelete)
+}
+
 // Create mocks base method.
 func (m *MockIListRepository) Create(list models.List) (*models.List, error) {
 	m.ctrl.T.Helper()

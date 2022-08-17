@@ -83,3 +83,79 @@ func (lir *ListItemRepository) DeleteListItemsByListID(listId string) (*int, err
 
 	return &rowsDeleted, nil
 }
+
+func (lir *ListItemRepository) BulkDelete(tasksToDelete []models.ListItem) (*int, error) {
+
+	//db.Delete(&users, []int{1,2,3})
+	//// DELETE FROM users WHERE id IN (1,2,3);
+	idsToDelete := extractIdsFromTasksToDelete(tasksToDelete)
+
+	result := lir.db.Delete(&models.ListItem{}, idsToDelete)
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	rowsDeleted := int(result.RowsAffected)
+
+	return &rowsDeleted, nil
+
+}
+
+func (lir *ListItemRepository) MarkAsCompleted(tasksToDelete []models.ListItem) (*int, error) {
+
+	//db.Delete(&users, []int{1,2,3})
+	//// DELETE FROM users WHERE id IN (1,2,3);
+	idsToUpdate := extractIdsFromTasksToUpdate(tasksToDelete)
+
+	result := lir.db.Table("list_items").Where("id IN ?", idsToUpdate).Updates(map[string]interface{}{"is_done": true})
+	//result := lir.db.Model(models.ListItem{}).Where("id in ?", idsToDelete).Updates(map[string]interface{}{"is_done": true})
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	rowsDeleted := int(result.RowsAffected)
+
+	return &rowsDeleted, nil
+
+}
+
+func (lir *ListItemRepository) MarkAsPending(tasksToDelete []models.ListItem) (*int, error) {
+
+	//db.Delete(&users, []int{1,2,3})
+	//// DELETE FROM users WHERE id IN (1,2,3);
+	idsToUpdate := extractIdsFromTasksToUpdate(tasksToDelete)
+
+	result := lir.db.Table("list_items").Where("id IN ?", idsToUpdate).Updates(map[string]interface{}{"is_done": false})
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	rowsDeleted := int(result.RowsAffected)
+
+	return &rowsDeleted, nil
+
+}
+
+func extractIdsFromTasksToDelete(tasksToDelete []models.ListItem) *[]uint {
+
+	var idsToDelete []uint
+
+	for _, task := range tasksToDelete {
+		idsToDelete = append(idsToDelete, task.ID)
+	}
+
+	return &idsToDelete
+}
+
+func extractIdsFromTasksToUpdate(tasksToDelete []models.ListItem) []int {
+
+	var idsToUpdate []int
+
+	for _, task := range tasksToDelete {
+		idsToUpdate = append(idsToUpdate, int(task.ID))
+	}
+
+	return idsToUpdate
+}
